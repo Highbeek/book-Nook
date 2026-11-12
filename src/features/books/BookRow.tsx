@@ -9,8 +9,8 @@ import type { ViewHandle, ViewRef } from '@/utils/refs';
 import { AppText } from '@/components/AppText';
 
 export const BOOK_ROW_HEIGHT = 120;
-const COVER_WIDTH = 64;
-const COVER_HEIGHT = 96;
+export const COVER_WIDTH = 64;
+export const COVER_HEIGHT = 96;
 
 export interface BookRowProps {
   book: BookSummary;

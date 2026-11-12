@@ -1,22 +1,11 @@
 import { Image, type ImageSource } from 'expo-image';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 import { colors, radius, spacing } from '@/theme';
 
 import { Button } from './Button';
 import { AppText } from './AppText';
-
-export function LoadingView({ label = 'Loading…' }: { label?: string }) {
-  return (
-    <View style={styles.center} accessible role="progressbar" aria-label={label} aria-busy>
-      <ActivityIndicator size="large" color={colors.primary} />
-      <AppText tone="muted" align="center">
-        {label}
-      </AppText>
-    </View>
-  );
-}
 
 export function ErrorView({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (

@@ -7,13 +7,14 @@ import type { BookDetail } from '@/api/types';
 import { BookCover } from '@/components/BookCover';
 import { Button } from '@/components/Button';
 import { Price } from '@/components/Price';
-import { ErrorView, LoadingView } from '@/components/StateViews';
+import { ErrorView } from '@/components/StateViews';
 import { selectQuantity, useCartStore } from '@/features/cart/cartStore';
 import { useAddToCart } from '@/features/cart/useAddToCart';
 import { colors, radius, spacing } from '@/theme';
 import type { ViewHandle } from '@/utils/refs';
 
 import { RatingSummary } from './RatingSummary';
+import { BookDetailsSkeleton } from './BookSkeletons';
 import { useBookDetails } from './useBookDetails';
 import { AppText } from '@/components/AppText';
 
@@ -24,7 +25,7 @@ export function BookDetailsScreen() {
   return (
     <View style={styles.screen}>
       <Stack.Screen options={{ title: title ?? 'Book' }} />
-      {details.status === 'loading' ? <LoadingView label="Loading book…" /> : null}
+      {details.status === 'loading' ? <BookDetailsSkeleton label="Loading book…" /> : null}
       {details.status === 'error' ? (
         <ErrorView message={details.error} onRetry={details.retry} />
       ) : null}

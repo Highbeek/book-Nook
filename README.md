@@ -34,11 +34,11 @@ Expo inlines `EXPO_PUBLIC_*` values into the app bundle, so they must never hold
 ## Features
 
 - **Browse and search.** With no search term, the list shows the Open Library "fiction" subject feed (over 600k works). Typing searches by title or author. Search is debounced by 400 ms, and an older response can't overwrite a newer one.
-- **Infinite scroll.** The list fetches 20 books per page. It shows a footer spinner while loading, a retry button if a page fails, and a message at the end of the list. Pull to refresh reloads from page 1.
-- **Book details.** Shows the cover, authors, price, description, subjects, and reader reviews (average star rating, total count, and a 5★–1★ breakdown). The screen moves through loading, error (with "Try again"), and success states.
+- **Infinite scroll.** The list fetches 20 books per page. The first load shows skeleton rows shaped like real ones; later pages show a footer spinner while loading, a retry button if a page fails, and a message at the end of the list. Pull to refresh reloads from page 1.
+- **Book details.** Shows the cover, authors, price, description, subjects, and reader reviews (average star rating, total count, and a 5★–1★ breakdown). The screen moves through loading (a skeleton of the page layout), error (with "Try again"), and success states. A book opened before appears instantly from an in-memory cache.
 - **Cart.** You can add books, increase or decrease quantities, and remove lines, and the total updates as you go. Adding a book that's already in the cart increases its quantity. Reducing a quantity to 0 removes the line. The cart is saved across app restarts.
 - **Add-to-cart animation.** The book's cover flies along an arc into the header cart icon, which then bounces. The animation runs from both the list rows and the details screen. If the OS "reduce motion" setting is on, only the bounce plays.
-- **Checkout.** A react-hook-form form validated by a yup schema (name, email format, any 12–19 digit card number, a real and unexpired MM/YY expiry, 3–4 digit CVC), with card formatting as you type, keyboard handling (Next moves between fields, a keyboard toolbar with previous, next and Done buttons, and drag or tap outside to close), a mock payment gateway that returns success or decline, and an order confirmation screen.
+- **Checkout.** A react-hook-form form validated by a yup schema (name, email format, any 12–19 digit card number, a real and unexpired MM/YY expiry, 3–4 digit CVC), with card formatting as you type, keyboard handling (a digits-only keypad for card fields, Next moves through the text fields, the focused field scrolls above the keyboard, and drag or tap outside to close), a mock payment gateway that returns success or decline, and an order confirmation screen.
 
 ## Technical choices
 
@@ -68,7 +68,7 @@ The cart is the only state shared across screens. I chose Zustand over Context a
 - **Testable without React.** The cart rules are tested directly through `useCartStore.getState()`, and the UI tests use the same store.
 - **Persistence** is one middleware (`persist` with AsyncStorage). Only the cart lines are saved, and each line stores a minimal snapshot of the book.
 
-Data fetching for the list and details screens uses local hooks (`useBooks`, `useBookDetails`) rather than a global store, because that data belongs to a single screen. In a larger app I'd use TanStack Query for caching and deduplicating server data, but here the brief asks for an explicit `useEffect` lifecycle.
+Data fetching for the list and details screens uses local hooks (`useBooks`, `useBookDetails`) rather than a global store, because that data belongs to a single screen. In a larger app I'd use TanStack Query for caching and deduplicating server data, but here the brief asks for an explicit `useEffect` lifecycle. A small in-memory cache in the API layer ([`src/api/cache.ts`](src/api/cache.ts)) covers the main case instead: reopening a book shows it instantly, with no spinner and no request. Entries expire after 10 minutes, at most 50 books are kept (least recently used are evicted first), and failures are never cached, so "Try again" always refetches.
 
 ### UI primitives
 
@@ -105,7 +105,7 @@ The cart is updated *immediately* and the animation is decoration only, so state
 - `initialNumToRender`, `maxToRenderPerBatch`, `windowSize={7}` and `removeClippedSubviews` keep the number of mounted rows low no matter how far the user scrolls.
 - **Images:** `expo-image` loads covers lazily with a memory and disk cache. A `recyclingKey` stops a recycled row from briefly showing the previous book's cover. Rows request medium-size covers and the details screen requests large ones.
 - **Pagination is guarded:** a request already in flight blocks new ones, nothing is fetched past the last page, and nothing is fetched while in an error state (so `onEndReached` can't loop on a failing request). Changing the query aborts the previous request.
-- **Network:** search requests ask only for the five fields the list uses (`fields=`), and typing in search is debounced.
+- **Network:** search requests ask only for the five fields the list uses (`fields=`), typing in search is debounced, and book details are cached in memory so reopening a book makes no request.
 
 ### Checkout: mock "secure" payment
 
@@ -142,7 +142,7 @@ src/
 
 ## Testing
 
-There are 152 tests across 23 suites, with about 97% line coverage (`npm run test:coverage`). They use Jest (`jest-expo`) and React Native Testing Library v14, and query by role and label the way a user or screen reader would.
+There are 159 tests across 25 suites, with about 97% line coverage (`npm run test:coverage`). They use Jest (`jest-expo`) and React Native Testing Library v14, and query by role and label the way a user or screen reader would.
 
 | Area | What's covered |
 | --- | --- |
@@ -159,4 +159,4 @@ There are 152 tests across 23 suites, with about 97% line coverage (`npm run tes
 - **Live API.** The app depends on Open Library's uptime and speed, and the browse feed gets slow at very deep offsets. In production I'd put our own backend or cache in front of it. Every screen handles network failure with a retry.
 - **Prices are synthetic** (explained above).
 - **No E2E tests.** With more time I'd add Maestro flows for browse → add → checkout, and run tests and typecheck in CI.
-- Possible additions: a TanStack Query cache shared between list and details, a dark theme, a book detail placeholder built from the list row data, and FlashList if row heights ever become variable.
+- Possible additions: TanStack Query in place of the hand-written cache, a dark theme, a book detail placeholder built from the list row data, and FlashList if row heights ever become variable.

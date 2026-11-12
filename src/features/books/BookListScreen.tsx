@@ -11,12 +11,13 @@ import {
 } from 'react-native';
 
 import type { BookSummary } from '@/api/types';
-import { EmptyView, ErrorView, LoadingView } from '@/components/StateViews';
+import { EmptyView, ErrorView } from '@/components/StateViews';
 import { useAddToCart } from '@/features/cart/useAddToCart';
 import { colors, spacing } from '@/theme';
 import { useDebouncedValue } from '@/utils/useDebouncedValue';
 
 import { BOOK_ROW_HEIGHT, BookRow } from './BookRow';
+import { BookListSkeleton } from './BookSkeletons';
 import { SearchBar } from './SearchBar';
 import { useBooks } from './useBooks';
 import { AppText } from '@/components/AppText';
@@ -50,7 +51,7 @@ export function BookListScreen() {
   );
 
   const renderBody = () => {
-    if (status === 'loading') return <LoadingView label="Finding books…" />;
+    if (status === 'loading') return <BookListSkeleton label="Finding books…" />;
     if (status === 'error' && items.length === 0) {
       return <ErrorView message={error ?? 'Could not load books.'} onRetry={retry} />;
     }
