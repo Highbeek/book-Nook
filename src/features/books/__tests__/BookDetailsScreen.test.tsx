@@ -1,6 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 
-import { getBookById } from '@/api/books';
+import { getBookById, getCachedBook } from '@/api/books';
 import { ApiError } from '@/api/client';
 import type { BookDetail } from '@/api/types';
 import { useCartStore } from '@/features/cart/cartStore';
@@ -12,8 +12,10 @@ import { BookDetailsScreen } from '../BookDetailsScreen';
 jest.mock('@/api/books', () => ({
   ...jest.requireActual('@/api/books'),
   getBookById: jest.fn(),
+  getCachedBook: jest.fn(),
 }));
 const mockGetBookById = jest.mocked(getBookById);
+const mockGetCachedBook = jest.mocked(getCachedBook);
 
 let mockParams: Record<string, string> = { id: 'OL1W', title: 'Things Fall Apart' };
 jest.mock('expo-router', () => ({
@@ -25,11 +27,21 @@ const book = makeBookDetail({ id: 'OL1W', title: 'Things Fall Apart', price: 4_5
 
 beforeEach(() => {
   mockGetBookById.mockReset();
+  mockGetCachedBook.mockReset();
   mockParams = { id: 'OL1W', title: 'Things Fall Apart' };
   useCartStore.setState({ lines: [] });
 });
 
 describe('<BookDetailsScreen />', () => {
+  it('shows a previously loaded book instantly, without a spinner or a new request', async () => {
+    mockGetCachedBook.mockReturnValue(book);
+    await render(<BookDetailsScreen />);
+
+    expect(screen.getByRole('heading', { name: 'Things Fall Apart' })).toBeOnTheScreen();
+    expect(screen.queryByRole('progressbar')).not.toBeOnTheScreen();
+    expect(mockGetBookById).not.toHaveBeenCalled();
+  });
+
   it('shows a loading indicator, then the book on success', async () => {
     const request = deferred<BookDetail>();
     mockGetBookById.mockReturnValue(request.promise);

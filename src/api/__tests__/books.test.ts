@@ -1,4 +1,6 @@
 import {
+  clearBookCache,
+  getCachedBook,
   buildBooksUrl,
   coverUrl,
   getBookById,
@@ -147,6 +149,31 @@ describe('getBooks', () => {
 });
 
 describe('getBookById', () => {
+  beforeEach(() => clearBookCache());
+
+  it('serves a repeat visit from the cache without refetching', async () => {
+    const fetchFn = mockFetch().mockResolvedValue(
+      mockResponse({ key: '/works/OL9W', title: 'Cached' }),
+    );
+
+    const first = await getBookById('OL9W');
+    const callsAfterFirst = fetchFn.mock.calls.length;
+    const second = await getBookById('OL9W');
+
+    expect(second).toBe(first);
+    expect(getCachedBook('OL9W')).toBe(first);
+    expect(fetchFn).toHaveBeenCalledTimes(callsAfterFirst);
+  });
+
+  it('does not cache failures, so a retry fetches again', async () => {
+    const fetchFn = mockFetch().mockResolvedValue(mockResponse({}, { status: 500 }));
+    await expect(getBookById('OL8W')).rejects.toBeDefined();
+
+    expect(getCachedBook('OL8W')).toBeUndefined();
+    fetchFn.mockResolvedValue(mockResponse({ key: '/works/OL8W', title: 'Recovered' }));
+    await expect(getBookById('OL8W')).resolves.toMatchObject({ title: 'Recovered' });
+  });
+
   const work = {
     key: '/works/OL893415W',
     title: 'Dune',

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { getBookById } from '@/api/books';
+import { getBookById, getCachedBook } from '@/api/books';
 import { errorMessage, isAbortError } from '@/api/client';
 import type { BookDetail } from '@/api/types';
 
@@ -17,9 +17,10 @@ export function useBookDetails(id: string | undefined) {
   const [attempt, setAttempt] = useState(0);
   const [settled, setSettled] = useState<Settled | null>(null);
   const key = `${id}:${attempt}`;
+  const cached = id ? getCachedBook(id) : undefined;
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || getCachedBook(id)) return;
     const requestKey = `${id}:${attempt}`;
     const controller = new AbortController();
 
@@ -39,6 +40,7 @@ export function useBookDetails(id: string | undefined) {
 
   let state: BookDetailsState;
   if (!id) state = { status: 'error', error: 'No book was selected.' };
+  else if (cached) state = { status: 'success', book: cached };
   else if (!settled || settled.key !== key) state = { status: 'loading' };
   else if (settled.status === 'success') state = { status: 'success', book: settled.book };
   else state = { status: 'error', error: settled.error };

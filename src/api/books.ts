@@ -1,5 +1,6 @@
 import { env } from '@/config/env';
 
+import { createCache } from './cache';
 import { ApiError, createAbortError, fetchJson, isAbortError } from './client';
 import { priceFor } from './pricing';
 import type {
@@ -166,7 +167,20 @@ async function fetchRating(workKey: string, signal?: AbortSignal): Promise<BookR
   }
 }
 
+const bookCache = createCache<BookDetail>({ ttlMs: 10 * 60_000, maxEntries: 50 });
+
+export function getCachedBook(id: string): BookDetail | undefined {
+  return bookCache.get(id);
+}
+
+export function clearBookCache() {
+  bookCache.clear();
+}
+
 export async function getBookById(id: string, signal?: AbortSignal): Promise<BookDetail> {
+  const cached = bookCache.get(id);
+  if (cached) return cached;
+
   let work = await fetchJson<OLWork>(`${API_BASE}/works/${encodeURIComponent(id)}.json`, {
     signal,
   });
@@ -190,10 +204,12 @@ export async function getBookById(id: string, signal?: AbortSignal): Promise<Boo
     yearFrom(work.first_publish_date),
   );
 
-  return {
+  const book: BookDetail = {
     ...summary,
     description: descriptionText(work.description),
     subjects: (work.subjects ?? []).slice(0, 8),
     rating,
   };
+  bookCache.set(id, book);
+  return book;
 }
