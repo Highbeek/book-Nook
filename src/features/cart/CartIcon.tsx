@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { useCartTarget } from '@/animation/FlyToCart';
@@ -8,6 +8,7 @@ import { colors } from '@/theme';
 import type { ViewHandle } from '@/utils/refs';
 
 import { selectItemCount, useCartStore } from './cartStore';
+import { AppText } from '@/components/AppText';
 
 export function CartIcon() {
   const count = useCartStore(selectItemCount);
@@ -26,12 +27,12 @@ export function CartIcon() {
       testID="cart-icon"
     >
       <Animated.View ref={ref} collapsable={false} style={[styles.icon, bumpStyle]}>
-        <Text style={styles.glyph}>🛒</Text>
+        <AppText style={styles.glyph}>🛒</AppText>
         {count > 0 ? (
           <View style={styles.badge}>
-            <Text style={styles.badgeText} testID="cart-badge">
+            <AppText tone="inverse" weight="bold" style={styles.badgeText} testID="cart-badge">
               {count > 99 ? '99+' : count}
-            </Text>
+            </AppText>
           </View>
         ) : null}
       </Animated.View>
@@ -54,5 +55,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badgeText: { color: colors.onPrimary, fontSize: 11, fontWeight: '700' },
+  badgeText: { fontSize: 11 },
 });

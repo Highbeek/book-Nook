@@ -1,9 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { PulseOnChange } from '@/animation/PulseOnChange';
 import { Price } from '@/components/Price';
-import { colors, font, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 import { selectItemCount, selectTotal, useCartStore } from './cartStore';
+import { AppText } from '@/components/AppText';
 
 export function CartSummary() {
   const total = useCartStore(selectTotal);
@@ -12,12 +14,16 @@ export function CartSummary() {
   return (
     <View style={styles.box}>
       <View style={styles.row}>
-        <Text style={styles.label}>
+        <AppText>
           Subtotal ({count} {count === 1 ? 'item' : 'items'})
-        </Text>
-        <Price amount={total} variant="total" testID="cart-total" />
+        </AppText>
+        <PulseOnChange value={total}>
+          <Price amount={total} variant="total" testID="cart-total" />
+        </PulseOnChange>
       </View>
-      <Text style={styles.note}>Delivery is free on all orders.</Text>
+      <AppText variant="caption" tone="muted">
+        Delivery is free on all orders.
+      </AppText>
     </View>
   );
 }
@@ -25,6 +31,4 @@ export function CartSummary() {
 const styles = StyleSheet.create({
   box: { gap: spacing.xs },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  label: { fontSize: font.body, color: colors.text },
-  note: { fontSize: font.caption, color: colors.textMuted },
 });

@@ -1,14 +1,19 @@
 import { useRouter } from 'expo-router';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { EmptyView } from '@/components/StateViews';
-import { colors, font, spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
+import { useResetStack } from '@/utils/navigation';
 
 import { CartItemRow } from './CartItemRow';
 import { CartSummary } from './CartSummary';
 import { selectItemCount, useCartStore, type CartLine } from './cartStore';
+import { AppText } from '@/components/AppText';
+
+const emptyCartImage = require('../../../assets/icons/shopping-cart.png');
 
 const keyExtractor = (line: CartLine) => line.book.id;
 const renderItem = ({ item }: { item: CartLine }) => <CartItemRow line={item} />;
@@ -18,6 +23,10 @@ export function CartScreen() {
   const count = useCartStore(selectItemCount);
   const clear = useCartStore((s) => s.clear);
   const router = useRouter();
+  const resetStack = useResetStack();
+  // Start over on a fresh home screen: a forward (push) transition, with the old stack cleared
+  // so "back" can't return to the empty cart.
+  const browseBooks = () => resetStack('index');
   const insets = useSafeAreaInsets();
   const footerStyle = [styles.footer, { paddingBottom: insets.bottom + spacing.md }];
 
@@ -30,9 +39,13 @@ export function CartScreen() {
   if (lines.length === 0) {
     return (
       <View style={styles.screen}>
-        <EmptyView title="Your cart is empty" message="Books you add will show up here." />
+        <EmptyView
+          image={emptyCartImage}
+          title="Your cart is empty"
+          message="Books you add will show up here."
+        />
         <View style={footerStyle}>
-          <Button label="Browse books" variant="secondary" onPress={() => router.dismissTo('/')} />
+          <Button label="Browse books" variant="secondary" onPress={browseBooks} />
         </View>
       </View>
     );
@@ -41,14 +54,22 @@ export function CartScreen() {
   return (
     <View style={styles.screen}>
       <View style={styles.toolbar}>
-        <Text style={styles.count}>
+        <AppText variant="caption" tone="muted">
           {count} {count === 1 ? 'item' : 'items'}
-        </Text>
+        </AppText>
         <Pressable role="button" aria-label="Clear cart" onPress={confirmClear} hitSlop={10}>
-          <Text style={styles.clear}>Clear all</Text>
+          <AppText variant="caption" tone="danger" weight="semibold">
+            Clear all
+          </AppText>
         </Pressable>
       </View>
-      <FlatList data={lines} keyExtractor={keyExtractor} renderItem={renderItem} />
+      {/* Removed rows slide out and the rows below glide up into the gap. */}
+      <Animated.FlatList
+        data={lines}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        itemLayoutAnimation={LinearTransition.duration(220)}
+      />
       <View style={footerStyle}>
         <CartSummary />
         <Button label="Checkout" onPress={() => router.push('/checkout')} />
@@ -66,8 +87,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  count: { fontSize: font.caption, color: colors.textMuted },
-  clear: { fontSize: font.caption, color: colors.danger, fontWeight: '600' },
   footer: {
     gap: spacing.md,
     padding: spacing.lg,

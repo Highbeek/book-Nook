@@ -1,12 +1,15 @@
 import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeOutLeft } from 'react-native-reanimated';
 
+import { PulseOnChange } from '@/animation/PulseOnChange';
 import { BookCover } from '@/components/BookCover';
 import { Price } from '@/components/Price';
 import { colors, font, spacing } from '@/theme';
 
 import { useCartStore, type CartLine } from './cartStore';
 import { QuantityStepper } from './QuantityStepper';
+import { AppText } from '@/components/AppText';
 
 function CartItemRowComponent({ line }: { line: CartLine }) {
   const { book, quantity } = line;
@@ -15,15 +18,20 @@ function CartItemRowComponent({ line }: { line: CartLine }) {
   const removeItem = useCartStore((s) => s.removeItem);
 
   return (
-    <View style={styles.row} testID={`cart-line-${book.id}`}>
+    <Animated.View
+      entering={FadeIn.duration(200)}
+      exiting={FadeOutLeft.duration(220)}
+      style={styles.row}
+      testID={`cart-line-${book.id}`}
+    >
       <BookCover coverId={book.coverId} title={book.title} width={56} height={84} size="S" />
       <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={2}>
+        <AppText weight="semibold" numberOfLines={2}>
           {book.title}
-        </Text>
-        <Text style={styles.meta} numberOfLines={1}>
+        </AppText>
+        <AppText variant="caption" tone="muted" numberOfLines={1}>
           <Price amount={book.price} style={styles.unitPrice} /> each
-        </Text>
+        </AppText>
         <View style={styles.controls}>
           <QuantityStepper
             quantity={quantity}
@@ -37,12 +45,16 @@ function CartItemRowComponent({ line }: { line: CartLine }) {
             onPress={() => removeItem(book.id)}
             hitSlop={8}
           >
-            <Text style={styles.remove}>Remove</Text>
+            <AppText variant="caption" tone="danger" weight="semibold">
+              Remove
+            </AppText>
           </Pressable>
         </View>
       </View>
-      <Price amount={book.price} quantity={quantity} testID={`line-total-${book.id}`} />
-    </View>
+      <PulseOnChange value={quantity}>
+        <Price amount={book.price} quantity={quantity} testID={`line-total-${book.id}`} />
+      </PulseOnChange>
+    </Animated.View>
   );
 }
 
@@ -58,9 +70,6 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   info: { flex: 1, gap: spacing.xs },
-  title: { fontSize: font.body, fontWeight: '600', color: colors.text },
-  meta: { fontSize: font.caption, color: colors.textMuted },
   unitPrice: { fontSize: font.caption, color: colors.textMuted, fontWeight: '500' },
   controls: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg, marginTop: spacing.xs },
-  remove: { color: colors.danger, fontSize: font.caption, fontWeight: '600' },
 });

@@ -1,8 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { colors, font, radius } from '@/theme';
+import { PulseOnChange } from '@/animation/PulseOnChange';
+import { colors, radius } from '@/theme';
 
 import { MAX_QUANTITY } from './cartStore';
+import { AppText } from '@/components/AppText';
 
 export interface QuantityStepperProps {
   quantity: number;
@@ -27,11 +29,21 @@ export function QuantityStepper({
         hitSlop={6}
         style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
       >
-        <Text style={styles.btnText}>−</Text>
+        <AppText tone="primary" weight="semibold" style={styles.btnText}>
+          −
+        </AppText>
       </Pressable>
-      <Text style={styles.qty} aria-label={`Quantity ${quantity}`} testID="quantity">
-        {quantity}
-      </Text>
+      <PulseOnChange value={quantity}>
+        <AppText
+          weight="semibold"
+          align="center"
+          style={styles.qty}
+          aria-label={`Quantity ${quantity}`}
+          testID="quantity"
+        >
+          {quantity}
+        </AppText>
+      </PulseOnChange>
       <Pressable
         role="button"
         aria-label={`Increase quantity of ${itemLabel}`}
@@ -41,7 +53,9 @@ export function QuantityStepper({
         hitSlop={6}
         style={({ pressed }) => [styles.btn, pressed && styles.pressed, atMax && styles.disabled]}
       >
-        <Text style={styles.btnText}>+</Text>
+        <AppText tone="primary" weight="semibold" style={styles.btnText}>
+          +
+        </AppText>
       </Pressable>
     </View>
   );
@@ -59,13 +73,6 @@ const styles = StyleSheet.create({
   btn: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
   pressed: { backgroundColor: colors.surfaceMuted, borderRadius: radius.pill },
   disabled: { opacity: 0.35 },
-  btnText: { fontSize: 20, color: colors.primary, fontWeight: '600' },
-  qty: {
-    minWidth: 28,
-    textAlign: 'center',
-    fontSize: font.body,
-    fontWeight: '600',
-    color: colors.text,
-    fontVariant: ['tabular-nums'],
-  },
+  btnText: { fontSize: 20 },
+  qty: { minWidth: 28, fontVariant: ['tabular-nums'] },
 });

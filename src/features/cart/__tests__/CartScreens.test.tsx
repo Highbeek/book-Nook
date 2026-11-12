@@ -8,9 +8,24 @@ import { CartScreen } from '../CartScreen';
 import { useCartStore } from '../cartStore';
 
 const mockPush = jest.fn();
-const mockDismissTo = jest.fn();
+const mockReset = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush, dismissTo: mockDismissTo }),
+  useRouter: () => ({ push: mockPush }),
+  useNavigation: () => ({
+    reset: mockReset,
+    getState: () => ({
+      key: 'stack-1',
+      index: 1,
+      routeNames: ['index', 'cart'],
+      routes: [
+        { key: 'index-1', name: 'index' },
+        { key: 'cart-1', name: 'cart' },
+      ],
+      routeKeySeq: 2,
+      stale: false,
+      type: 'stack',
+    }),
+  }),
 }));
 
 /** Presses the button with `text` in the most recent Alert. */
@@ -22,7 +37,7 @@ function pressAlertButton(text: string) {
 beforeEach(() => {
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   mockPush.mockReset();
-  mockDismissTo.mockReset();
+  mockReset.mockReset();
   useCartStore.setState({ lines: [] });
 });
 
@@ -51,7 +66,10 @@ describe('<CartScreen />', () => {
     await render(<CartScreen />);
     expect(screen.getByText('Your cart is empty')).toBeOnTheScreen();
     await user.press(screen.getByRole('button', { name: 'Browse books' }));
-    expect(mockDismissTo).toHaveBeenCalledWith('/');
+    // A fresh home screen replaces the whole stack, so back can't return to the empty cart.
+    expect(mockReset).toHaveBeenCalledWith(
+      expect.objectContaining({ key: 'stack-1', index: 0, routes: [{ name: 'index' }] }),
+    );
   });
 
   it('lists lines with the total and proceeds to checkout', async () => {
