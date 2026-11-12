@@ -28,12 +28,8 @@ export default function RootLayout() {
         <Stack.Screen name="checkout" options={{ title: 'Checkout', headerRight: undefined }} />
         <Stack.Screen
           name="order-confirmation"
-          options={{
-            title: 'Thank you',
-            headerRight: undefined,
-            headerBackVisible: false,
-            gestureEnabled: false,
-          }}
+          // Full-screen success page: no header, and no swiping back into a paid checkout.
+          options={{ headerShown: false, gestureEnabled: false }}
         />
       </Stack>
     </FlyToCartProvider>

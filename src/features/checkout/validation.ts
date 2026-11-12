@@ -1,12 +1,4 @@
-export interface CheckoutValues {
-  fullName: string;
-  email: string;
-  cardNumber: string;
-  expiry: string;
-  cvc: string;
-}
-
-export type CheckoutErrors = Partial<Record<keyof CheckoutValues, string>>;
+import * as yup from 'yup';
 
 export const emptyCheckoutValues: CheckoutValues = {
   fullName: '',
@@ -31,21 +23,9 @@ export function formatExpiry(value: string): string {
   return digits.length <= 2 ? digits : `${digits.slice(0, 2)}/${digits.slice(2)}`;
 }
 
-export function isValidLuhn(cardNumber: string): boolean {
-  const digits = digitsOnly(cardNumber);
-  if (digits.length < 12 || digits.length > 19) return false;
-  let sum = 0;
-  let double = false;
-  for (let i = digits.length - 1; i >= 0; i--) {
-    let d = Number(digits[i]);
-    if (double) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    sum += d;
-    double = !double;
-  }
-  return sum % 10 === 0;
+/** Any 12–19 digit number is accepted: this is a demo checkout, so there is no Luhn check. */
+export function isValidCardNumber(cardNumber: string): boolean {
+  return /^\d{12,19}$/.test(digitsOnly(cardNumber));
 }
 
 export function isValidExpiry(expiry: string, now: Date = new Date()): boolean {
@@ -61,23 +41,40 @@ export function isValidExpiry(expiry: string, now: Date = new Date()): boolean {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function validateCheckout(values: CheckoutValues, now: Date = new Date()): CheckoutErrors {
-  const errors: CheckoutErrors = {};
-
-  if (values.fullName.trim().length < 2) errors.fullName = 'Enter the name on the card.';
-
-  if (!values.email.trim()) errors.email = 'Enter your email for the receipt.';
-  else if (!EMAIL_RE.test(values.email.trim())) errors.email = 'Enter a valid email address.';
-
-  if (!digitsOnly(values.cardNumber)) errors.cardNumber = 'Enter your card number.';
-  else if (!isValidLuhn(values.cardNumber)) errors.cardNumber = 'This card number is not valid.';
-
-  if (!values.expiry) errors.expiry = 'Enter the expiry date.';
-  else if (!isValidExpiry(values.expiry, now)) errors.expiry = 'Use a valid, future MM/YY date.';
-
-  if (!/^\d{3,4}$/.test(values.cvc)) errors.cvc = 'Enter the 3 or 4 digit security code.';
-
-  return errors;
+export interface CheckoutSchemaContext {
+  /** Injectable clock for the expiry check (tests pin it). */
+  now?: Date;
 }
 
-export const hasErrors = (errors: CheckoutErrors) => Object.keys(errors).length > 0;
+/**
+ * Checkout rules. Each field lists `required` first so an empty field gets the "Enter…"
+ * message rather than a format error. Trimming happens here, so submitted values are clean.
+ */
+export const checkoutSchema = yup.object({
+  fullName: yup
+    .string()
+    .trim()
+    .required('Enter the name on the card.')
+    .min(2, 'Enter the name on the card.'),
+  email: yup
+    .string()
+    .trim()
+    .required('Enter your email for the receipt.')
+    .matches(EMAIL_RE, 'Enter a valid email address.'),
+  cardNumber: yup
+    .string()
+    .required('Enter your card number.')
+    .test('length', 'Enter a 12–19 digit card number.', (value) => isValidCardNumber(value)),
+  expiry: yup
+    .string()
+    .required('Enter the expiry date.')
+    .test('future', 'Use a valid, future MM/YY date.', (value, ctx) =>
+      isValidExpiry(value, (ctx.options.context as CheckoutSchemaContext | undefined)?.now),
+    ),
+  cvc: yup
+    .string()
+    .required('Enter the 3 or 4 digit security code.')
+    .matches(/^\d{3,4}$/, 'Enter the 3 or 4 digit security code.'),
+});
+
+export type CheckoutValues = yup.InferType<typeof checkoutSchema>;

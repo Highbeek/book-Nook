@@ -2,10 +2,11 @@ import { render, screen, userEvent } from '@testing-library/react-native';
 
 import { OrderConfirmationScreen } from '../OrderConfirmationScreen';
 
-const mockDismissTo = jest.fn();
+const mockResetStack = jest.fn();
+jest.mock('@/utils/navigation', () => ({ useResetStack: () => mockResetStack }));
+
 let mockParams: Record<string, string> = {};
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ dismissTo: mockDismissTo }),
   useLocalSearchParams: () => mockParams,
 }));
 
@@ -17,17 +18,19 @@ describe('<OrderConfirmationScreen />', () => {
 
     expect(screen.getByRole('heading', { name: 'Order confirmed' })).toBeOnTheScreen();
     expect(screen.getByText('₦7,500')).toBeOnTheScreen();
-    expect(screen.getByText('Paid with card ending 4242')).toBeOnTheScreen();
-    expect(screen.getByText('Reference: BN_123')).toBeOnTheScreen();
+    expect(screen.getByText('Card •••• 4242')).toBeOnTheScreen();
+    expect(screen.getByText('BN_123')).toBeOnTheScreen();
+    expect(screen.getByText(/receipt is on its way/)).toBeOnTheScreen();
 
     await user.press(screen.getByRole('button', { name: 'Continue shopping' }));
-    expect(mockDismissTo).toHaveBeenCalledWith('/');
+    expect(mockResetStack).toHaveBeenCalledWith('index');
   });
 
   it('still renders when opened without params', async () => {
     mockParams = {};
     await render(<OrderConfirmationScreen />);
     expect(screen.getByRole('heading', { name: 'Order confirmed' })).toBeOnTheScreen();
-    expect(screen.queryByText(/Reference/)).not.toBeOnTheScreen();
+    expect(screen.queryByText('Reference')).not.toBeOnTheScreen();
+    expect(screen.queryByText('Amount paid')).not.toBeOnTheScreen();
   });
 });

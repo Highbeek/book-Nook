@@ -19,6 +19,18 @@ describe('<CheckoutForm />', () => {
     expect(screen.getByRole('button', { name: 'Pay ₦7,500' })).toBeOnTheScreen();
   });
 
+  it('opens a numeric keyboard and ignores non-digits in the card fields', async () => {
+    const user = userEvent.setup();
+    await render(<CheckoutForm amount={100} onSuccess={jest.fn()} pay={jest.fn()} />);
+
+    for (const label of ['Card number', 'Expiry (MM/YY)', 'CVC']) {
+      expect(screen.getByLabelText(label)).toHaveProp('inputMode', 'numeric');
+    }
+    // Pasted or hardware-keyboard letters are stripped.
+    await user.type(screen.getByLabelText('Card number'), '4242abcd4242');
+    expect(screen.getByLabelText('Card number')).toHaveDisplayValue('4242 4242');
+  });
+
   it('formats card number and expiry as the user types', async () => {
     const user = userEvent.setup();
     await render(<CheckoutForm amount={100} onSuccess={jest.fn()} pay={jest.fn()} />);
@@ -41,6 +53,18 @@ describe('<CheckoutForm />', () => {
     expect(screen.getByText('Enter your card number.')).toBeOnTheScreen();
     expect(screen.getByText('Enter the 3 or 4 digit security code.')).toBeOnTheScreen();
     expect(pay).not.toHaveBeenCalled();
+  });
+
+  it('validates a field as the user types, leaving untouched fields alone', async () => {
+    const user = userEvent.setup();
+    await render(<CheckoutForm amount={100} onSuccess={jest.fn()} pay={jest.fn()} />);
+
+    await user.type(screen.getByLabelText('Email'), 'ada@');
+    expect(screen.getByText('Enter a valid email address.')).toBeOnTheScreen();
+    expect(screen.queryByText('Enter the name on the card.')).not.toBeOnTheScreen();
+
+    await user.type(screen.getByLabelText('Email'), 'example.com');
+    expect(screen.queryByText('Enter a valid email address.')).not.toBeOnTheScreen();
   });
 
   it('clears an error live once the user fixes the field', async () => {

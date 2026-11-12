@@ -1,14 +1,30 @@
+import { ValidationError } from 'yup';
+
 import {
+  checkoutSchema,
   formatCardNumber,
   formatExpiry,
-  hasErrors,
   isValidExpiry,
-  isValidLuhn,
-  validateCheckout,
+  isValidCardNumber,
   type CheckoutValues,
 } from '../validation';
 
 const NOW = new Date(2026, 10, 12); // 12 Nov 2026
+
+/** First message per field, the way react-hook-form's yup resolver reports them. */
+function validate(values: CheckoutValues): Partial<Record<keyof CheckoutValues, string>> {
+  try {
+    checkoutSchema.validateSync(values, { abortEarly: false, context: { now: NOW } });
+    return {};
+  } catch (error) {
+    if (!(error instanceof ValidationError)) throw error;
+    const errors: Record<string, string> = {};
+    for (const inner of error.inner) {
+      if (inner.path && !(inner.path in errors)) errors[inner.path] = inner.message;
+    }
+    return errors;
+  }
+}
 
 const valid: CheckoutValues = {
   fullName: 'Ada Lovelace',
@@ -18,14 +34,14 @@ const valid: CheckoutValues = {
   cvc: '123',
 };
 
-describe('isValidLuhn', () => {
-  it.each(['4242424242424242', '4000 0000 0000 0002', '5555555555554444', '378282246310005'])(
-    'accepts valid test card %s',
-    (card) => expect(isValidLuhn(card)).toBe(true),
+describe('isValidCardNumber', () => {
+  it.each(['4242424242424242', '4242 4242 4242 4241', '1234 5678 9012', '1'.repeat(19)])(
+    'accepts any 12–19 digit number: %s',
+    (card) => expect(isValidCardNumber(card)).toBe(true),
   );
 
-  it.each(['4242424242424241', '1234', '', '0'.repeat(20)])('rejects %p', (card) =>
-    expect(isValidLuhn(card)).toBe(false),
+  it.each(['', '1234', '1'.repeat(11), '1'.repeat(20)])('rejects %p', (card) =>
+    expect(isValidCardNumber(card)).toBe(false),
   );
 });
 
@@ -57,31 +73,57 @@ describe('formatters', () => {
   });
 });
 
-describe('validateCheckout', () => {
+describe('checkoutSchema', () => {
   it('passes valid input', () => {
-    expect(hasErrors(validateCheckout(valid, NOW))).toBe(false);
+    expect(validate(valid)).toEqual({});
   });
 
-  it('flags every missing field', () => {
-    const errors = validateCheckout(
-      { fullName: '', email: '', cardNumber: '', expiry: '', cvc: '' },
-      NOW,
-    );
-    expect(Object.keys(errors).sort()).toEqual(
-      ['cardNumber', 'cvc', 'email', 'expiry', 'fullName'].sort(),
-    );
+  it('asks for every missing field', () => {
+    expect(validate({ fullName: '', email: '', cardNumber: '', expiry: '', cvc: '' })).toEqual({
+      fullName: 'Enter the name on the card.',
+      email: 'Enter your email for the receipt.',
+      cardNumber: 'Enter your card number.',
+      expiry: 'Enter the expiry date.',
+      cvc: 'Enter the 3 or 4 digit security code.',
+    });
+  });
+
+  it('treats a whitespace-only name as missing', () => {
+    expect(validate({ ...valid, fullName: '   ' })).toEqual({
+      fullName: 'Enter the name on the card.',
+    });
   });
 
   it('flags malformed values with specific messages', () => {
-    const errors = validateCheckout(
-      { ...valid, email: 'ada@', cardNumber: '4242 4242 4242 4241', expiry: '01/20', cvc: '12' },
-      NOW,
-    );
-    expect(errors).toEqual({
+    expect(
+      validate({
+        ...valid,
+        fullName: 'A',
+        email: 'ada@',
+        cardNumber: '4242 4242',
+        expiry: '01/20',
+        cvc: '12',
+      }),
+    ).toEqual({
+      fullName: 'Enter the name on the card.',
       email: 'Enter a valid email address.',
-      cardNumber: 'This card number is not valid.',
+      cardNumber: 'Enter a 12–19 digit card number.',
       expiry: 'Use a valid, future MM/YY date.',
       cvc: 'Enter the 3 or 4 digit security code.',
     });
+  });
+
+  it('rejects an impossible expiry month', () => {
+    expect(validate({ ...valid, expiry: '13/30' })).toEqual({
+      expiry: 'Use a valid, future MM/YY date.',
+    });
+  });
+
+  it('trims name and email in the submitted values', () => {
+    const out = checkoutSchema.validateSync(
+      { ...valid, fullName: '  Ada Lovelace ', email: ' ada@example.com ' },
+      { context: { now: NOW } },
+    );
+    expect(out).toMatchObject({ fullName: 'Ada Lovelace', email: 'ada@example.com' });
   });
 });

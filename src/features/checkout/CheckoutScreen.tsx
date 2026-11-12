@@ -1,13 +1,16 @@
 import { useRouter } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Price } from '@/components/Price';
 import { EmptyView } from '@/components/StateViews';
 import { selectItemCount, selectTotal, useCartStore } from '@/features/cart/cartStore';
-import { colors, font, radius, spacing } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
 
 import { CheckoutForm } from './CheckoutForm';
 import type { PaymentProcessor, PaymentReceipt } from './paymentService';
+import { AppText } from '@/components/AppText';
+
+const emptyCartImage = require('../../../assets/icons/shopping-cart.png');
 
 export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
   const router = useRouter();
@@ -31,7 +34,11 @@ export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
   if (count === 0) {
     return (
       <View style={styles.screen}>
-        <EmptyView title="Nothing to check out" message="Add a book to your cart first." />
+        <EmptyView
+          image={emptyCartImage}
+          title="Nothing to check out"
+          message="Add a book to your cart first."
+        />
       </View>
     );
   }
@@ -42,11 +49,16 @@ export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={100}
     >
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        // Tap empty space or drag the form to close the keyboard.
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+      >
         <View style={styles.summary}>
-          <Text style={styles.summaryLabel}>
+          <AppText variant="caption" tone="muted">
             Order total · {count} {count === 1 ? 'item' : 'items'}
-          </Text>
+          </AppText>
           <Price amount={total} variant="large" testID="checkout-total" />
         </View>
         <CheckoutForm amount={total} onSuccess={handleSuccess} pay={pay} />
@@ -66,5 +78,4 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     gap: spacing.xs,
   },
-  summaryLabel: { fontSize: font.caption, color: colors.textMuted },
 });
