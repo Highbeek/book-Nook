@@ -1,4 +1,5 @@
 import { act, render, screen, userEvent } from '@testing-library/react-native';
+import { Alert, type AlertButton } from 'react-native';
 
 import { makeBook } from '@/test-utils/fixtures';
 
@@ -10,9 +11,21 @@ const mockPush = jest.fn();
 const mockDismissTo = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, dismissTo: mockDismissTo }),
+  // Render header buttons inline so tests can press them.
+  Stack: {
+    Screen: ({ options }: { options?: { headerRight?: () => React.ReactNode } }) =>
+      options?.headerRight?.() ?? null,
+  },
 }));
 
+/** Presses the button with `text` in the most recent Alert. */
+function pressAlertButton(text: string) {
+  const buttons = jest.mocked(Alert.alert).mock.lastCall?.[2] as AlertButton[];
+  buttons.find((b) => b.text === text)?.onPress?.();
+}
+
 beforeEach(() => {
+  jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   mockPush.mockReset();
   mockDismissTo.mockReset();
   useCartStore.setState({ lines: [] });
@@ -68,5 +81,35 @@ describe('<CartScreen />', () => {
     await user.press(screen.getByRole('button', { name: 'Remove Book A from cart' }));
 
     expect(screen.getByText('Your cart is empty')).toBeOnTheScreen();
+  });
+
+  it('clears the whole cart after confirmation', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().addItem(makeBook({ id: 'A', title: 'Book A' }));
+    useCartStore.getState().addItem(makeBook({ id: 'B', title: 'Book B' }));
+    await render(<CartScreen />);
+
+    await user.press(screen.getByRole('button', { name: 'Clear cart' }));
+    expect(Alert.alert).toHaveBeenCalledWith('Clear cart?', expect.any(String), expect.any(Array));
+
+    await act(async () => pressAlertButton('Clear'));
+    expect(useCartStore.getState().lines).toEqual([]);
+    expect(screen.getByText('Your cart is empty')).toBeOnTheScreen();
+  });
+
+  it('keeps the cart when clearing is cancelled', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().addItem(makeBook({ id: 'A', title: 'Book A' }));
+    await render(<CartScreen />);
+
+    await user.press(screen.getByRole('button', { name: 'Clear cart' }));
+    await act(async () => pressAlertButton('Cancel'));
+
+    expect(useCartStore.getState().lines).toHaveLength(1);
+  });
+
+  it('hides Clear when the cart is empty', async () => {
+    await render(<CartScreen />);
+    expect(screen.queryByRole('button', { name: 'Clear cart' })).not.toBeOnTheScreen();
   });
 });
