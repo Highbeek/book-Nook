@@ -90,7 +90,7 @@ The cart is updated *immediately* and the animation is decoration only, so state
 The brief asks for a secure purchase but gives no payment specification, so checkout is a **mock** that follows the shape of a real integration:
 
 - Validation runs on the device: Luhn check on the card number, MM/YY expiry that isn't in the past, 3- or 4-digit CVC, and email format. Errors appear after the first submit attempt and update as the user types.
-- `processPayment` turns the card into a token and returns only a reference and the last 4 digits. Card data is never stored or logged, and it's cleared from the form state after a successful payment.
+- `processPayment` turns the card into a token and returns only a reference and the last 4 digits. Card data is never stored or logged, and it's discarded when the checkout screen closes.
 - A `useRef` guard plus a disabled, busy button prevent a double tap from charging twice.
 - The test card `4000 0000 0000 0002` is always declined, and any other valid card number succeeds, for example `4242 4242 4242 4242`.
 
@@ -118,7 +118,7 @@ src/
 
 ## Testing
 
-There are 119 tests across 15 suites, with about 96% line coverage (`npm run test:coverage`). They use Jest (`jest-expo`) and React Native Testing Library v14, and query by role and label the way a user or screen reader would.
+There are 126 tests across 17 suites, with about 98% line coverage (`npm run test:coverage`). They use Jest (`jest-expo`) and React Native Testing Library v14, and query by role and label the way a user or screen reader would.
 
 | Area | What's covered |
 | --- | --- |
