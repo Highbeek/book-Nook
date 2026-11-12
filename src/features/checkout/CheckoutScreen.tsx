@@ -1,6 +1,12 @@
 import { useRouter } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAwareScrollView,
+  KeyboardToolbar,
+  type KeyboardToolbarProps,
+} from 'react-native-keyboard-controller';
 
+import { AppText } from '@/components/AppText';
 import { Price } from '@/components/Price';
 import { EmptyView } from '@/components/StateViews';
 import { selectItemCount, selectTotal, useCartStore } from '@/features/cart/cartStore';
@@ -8,9 +14,18 @@ import { colors, radius, spacing } from '@/theme';
 
 import { CheckoutForm } from './CheckoutForm';
 import type { PaymentProcessor, PaymentReceipt } from './paymentService';
-import { AppText } from '@/components/AppText';
 
 const emptyCartImage = require('../../../assets/icons/shopping-cart.png');
+
+const TOOLBAR_CLEARANCE = 64;
+
+const toolbarColors = {
+  primary: colors.primary,
+  disabled: colors.border,
+  background: colors.surfaceMuted,
+  ripple: colors.border,
+};
+const toolbarTheme: KeyboardToolbarProps['theme'] = { light: toolbarColors, dark: toolbarColors };
 
 export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
   const router = useRouter();
@@ -20,7 +35,7 @@ export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
 
   const handleSuccess = (receipt: PaymentReceipt) => {
     clear();
-    // replace, so "back" can't return to checkout with an empty cart.
+
     router.replace({
       pathname: '/order-confirmation',
       params: {
@@ -44,14 +59,10 @@ export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={100}
-    >
-      <ScrollView
+    <View style={styles.screen}>
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.content}
-        // Tap empty space or drag the form to close the keyboard.
+        bottomOffset={TOOLBAR_CLEARANCE}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
       >
@@ -62,8 +73,13 @@ export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
           <Price amount={total} variant="large" testID="checkout-total" />
         </View>
         <CheckoutForm amount={total} onSuccess={handleSuccess} pay={pay} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+      <KeyboardToolbar theme={toolbarTheme}>
+        <KeyboardToolbar.Prev />
+        <KeyboardToolbar.Next />
+        <KeyboardToolbar.Done />
+      </KeyboardToolbar>
+    </View>
   );
 }
 

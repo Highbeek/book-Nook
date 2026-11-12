@@ -38,7 +38,7 @@ Expo inlines `EXPO_PUBLIC_*` values into the app bundle, so they must never hold
 - **Book details.** Shows the cover, authors, price, description, subjects, and reader reviews (average star rating, total count, and a 5★–1★ breakdown). The screen moves through loading, error (with "Try again"), and success states.
 - **Cart.** You can add books, increase or decrease quantities, and remove lines, and the total updates as you go. Adding a book that's already in the cart increases its quantity. Reducing a quantity to 0 removes the line. The cart is saved across app restarts.
 - **Add-to-cart animation.** The book's cover flies along an arc into the header cart icon, which then bounces. The animation runs from both the list rows and the details screen. If the OS "reduce motion" setting is on, only the bounce plays.
-- **Checkout.** A react-hook-form form validated by a yup schema (name, email format, any 12–19 digit card number, a real and unexpired MM/YY expiry, 3–4 digit CVC), with card formatting as you type, keyboard handling (Next moves between fields, a Done bar above the iOS number pad, and drag or tap outside to close), a mock payment gateway that returns success or decline, and an order confirmation screen.
+- **Checkout.** A react-hook-form form validated by a yup schema (name, email format, any 12–19 digit card number, a real and unexpired MM/YY expiry, 3–4 digit CVC), with card formatting as you type, keyboard handling (Next moves between fields, a keyboard toolbar with previous, next and Done buttons, and drag or tap outside to close), a mock payment gateway that returns success or decline, and an order confirmation screen.
 
 ## Technical choices
 
@@ -135,14 +135,14 @@ src/
     cart/            Zustand store, cart screen, rows, stepper, icon
     checkout/        form, yup schema + formatters, mock payment service, confirmation
   animation/         fly-to-cart provider
-  components/        AppText, Price, Button, BookCover, TextField, KeyboardDoneBar, loading/error/empty views
+  components/        AppText, Price, Button, BookCover, TextField, loading/error/empty views
     form/            FormTextField (TextField bound to react-hook-form)
   test-utils/        fetch helpers, fixtures, Reanimated test double
 ```
 
 ## Testing
 
-There are 153 tests across 23 suites, with about 98% line coverage (`npm run test:coverage`). They use Jest (`jest-expo`) and React Native Testing Library v14, and query by role and label the way a user or screen reader would.
+There are 152 tests across 23 suites, with about 97% line coverage (`npm run test:coverage`). They use Jest (`jest-expo`) and React Native Testing Library v14, and query by role and label the way a user or screen reader would.
 
 | Area | What's covered |
 | --- | --- |
@@ -150,7 +150,7 @@ There are 153 tests across 23 suites, with about 98% line coverage (`npm run tes
 | **Cart add/remove** | Store rules (same book twice gives quantity 2, 0 or negative removes the line, quantity limit, invalid input, ordering, total, clear) and UI (stepper +/−, Remove, line and cart totals update, the last item switches to the empty state) |
 | **Book-fetching API** | URL building for browse vs search and pagination, mappers, `hasMore`, HTTP, network, parse and timeout errors, abort, redirect following, failed author and ratings lookups, ratings mapping |
 | **Checkout** | yup schema (every rule and message, trimming), card length/expiry/formatters, mock gateway, form (formatting, errors, live re-validation, exact charge payload, busy state, double-tap guard, decline and generic failure) and screen (charges the cart total, clears the cart and navigates on success, keeps the cart on decline) |
-| Also | `useBooks` (pagination, duplicate-request guard, stale-response protection on query change, page-level error and retry, refresh, abort on unmount), Book Details lifecycle (loading, success, error, retry, abort on unmount), rating summary (average, counts, singular wording, empty state), env config (defaults, overrides, trailing slashes), TextField (label, error, invalid state), keyboard Done bar (iOS only), list screen (debounced search makes one request, empty and error states, add to cart, navigation), cart icon badge, animation provider |
+| Also | `useBooks` (pagination, duplicate-request guard, stale-response protection on query change, page-level error and retry, refresh, abort on unmount), Book Details lifecycle (loading, success, error, retry, abort on unmount), rating summary (average, counts, singular wording, empty state), env config (defaults, overrides, trailing slashes), TextField (label, error, invalid state), list screen (debounced search makes one request, empty and error states, add to cart, navigation), cart icon badge, animation provider |
 
 **About the Reanimated mock:** Reanimated 4.7's bundled Jest mock starts its real runtime, which needs native modules (and DOM APIs on its JS fallback) that Jest doesn't provide. [`src/test-utils/mocks/reanimated.tsx`](src/test-utils/mocks/reanimated.tsx) is a small stand-in covering only the APIs the app uses, and animations finish instantly in it. The tests check the cart state the animation sits on top of, not the animation's timing.
 

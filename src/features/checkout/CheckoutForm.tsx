@@ -14,7 +14,6 @@ import Animated, {
 
 import { Button } from '@/components/Button';
 import { FormTextField } from '@/components/form/FormTextField';
-import { KeyboardDoneBar } from '@/components/KeyboardDoneBar';
 import { radius, spacing } from '@/theme';
 import { formatPrice } from '@/utils/currency';
 
@@ -35,7 +34,6 @@ import {
 import { AppText } from '@/components/AppText';
 
 export interface CheckoutFormProps {
-  /** Amount to charge, in minor units. */
   amount: number;
   onSuccess: (receipt: PaymentReceipt) => void;
   pay?: PaymentProcessor;
@@ -43,27 +41,21 @@ export interface CheckoutFormProps {
 
 const formatCvc = (raw: string) => digitsOnly(raw).slice(0, 4);
 
-const KEYBOARD_BAR_ID = 'checkout-keyboard';
-
-/** Keeps the keyboard up while "Next" moves focus to the following field. */
 const nextFieldProps = { returnKeyType: 'next', submitBehavior: 'submit' } as const;
 
 export function CheckoutForm({ amount, onSuccess, pay = processPayment }: CheckoutFormProps) {
   const { control, handleSubmit, subscribe, setFocus } = useForm<CheckoutValues>({
     resolver: yupResolver(checkoutSchema),
     defaultValues: emptyCheckoutValues,
-    // Validate each field as the user types; untouched fields stay quiet until submit.
     mode: 'onChange',
   });
   const [submitting, setSubmitting] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  // Blocks a double tap from charging twice before the disabled state renders.
   const inFlight = useRef(false);
   const reduceMotion = useReducedMotion();
   const shakeX = useSharedValue(0);
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shakeX.get() }] }));
 
-  /** A quick side-to-side shake: "something here needs fixing". */
   const shake = () => {
     if (reduceMotion) return;
     shakeX.set(
@@ -77,7 +69,6 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
     );
   };
 
-  // Editing any field dismisses a previous payment failure.
   useEffect(
     () => subscribe({ formState: { values: true }, callback: () => setPaymentError(null) }),
     [subscribe],
@@ -89,7 +80,6 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
     setSubmitting(true);
     setPaymentError(null);
     try {
-      // Values come out of the schema already trimmed.
       const receipt = await pay({
         amount,
         email: values.email,
@@ -144,7 +134,6 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
           autoComplete="cc-number"
           textContentType="creditCardNumber"
           placeholder="1234 5678 9012 3456"
-          inputAccessoryViewID={KEYBOARD_BAR_ID}
           {...nextFieldProps}
           onSubmitEditing={() => setFocus('expiry')}
         />
@@ -158,7 +147,6 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
             autoComplete="cc-exp"
             placeholder="MM/YY"
             style={styles.half}
-            inputAccessoryViewID={KEYBOARD_BAR_ID}
             {...nextFieldProps}
             onSubmitEditing={() => setFocus('cvc')}
           />
@@ -172,12 +160,10 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
             secureTextEntry
             placeholder="123"
             style={styles.half}
-            inputAccessoryViewID={KEYBOARD_BAR_ID}
             returnKeyType="done"
           />
         </View>
       </Animated.View>
-      <KeyboardDoneBar nativeID={KEYBOARD_BAR_ID} />
 
       {paymentError ? (
         <Animated.View
