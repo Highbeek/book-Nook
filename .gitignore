@@ -44,6 +44,7 @@ yarn-error.*
 coverage/
 
 # Local config
+docs/NOTES.md
 AGENTS.md
 CLAUDE.md
 .claude/
