@@ -1,14 +1,19 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { Image, type ImageSource } from 'expo-image';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
-import { colors, font, spacing } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
 
 import { Button } from './Button';
+import { AppText } from './AppText';
 
 export function LoadingView({ label = 'Loading…' }: { label?: string }) {
   return (
     <View style={styles.center} accessible role="progressbar" aria-label={label} aria-busy>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text style={styles.muted}>{label}</Text>
+      <AppText tone="muted" align="center">
+        {label}
+      </AppText>
     </View>
   );
 }
@@ -16,20 +21,42 @@ export function LoadingView({ label = 'Loading…' }: { label?: string }) {
 export function ErrorView({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <View style={styles.center}>
-      <Text style={styles.title}>Something went wrong</Text>
-      <Text style={styles.muted} role="alert">
+      <AppText variant="title" align="center">
+        Something went wrong
+      </AppText>
+      <AppText tone="muted" align="center" role="alert">
         {message}
-      </Text>
+      </AppText>
       {onRetry ? <Button label="Try again" onPress={onRetry} style={styles.action} /> : null}
     </View>
   );
 }
 
-export function EmptyView({ title, message }: { title: string; message?: string }) {
+export interface EmptyViewProps {
+  title: string;
+  message?: string;
+  /** Optional illustration, shown in a soft circle above the title. */
+  image?: ImageSource | number;
+}
+
+export function EmptyView({ title, message, image }: EmptyViewProps) {
   return (
     <View style={styles.center}>
-      <Text style={styles.title}>{title}</Text>
-      {message ? <Text style={styles.muted}>{message}</Text> : null}
+      {image ? (
+        <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.halo}>
+          <Image source={image} style={styles.image} contentFit="contain" accessible={false} />
+        </Animated.View>
+      ) : null}
+      <Animated.View entering={FadeInDown.delay(120).duration(250)} style={styles.text}>
+        <AppText variant="title" align="center">
+          {title}
+        </AppText>
+        {message ? (
+          <AppText tone="muted" align="center">
+            {message}
+          </AppText>
+        ) : null}
+      </Animated.View>
     </View>
   );
 }
@@ -42,7 +69,16 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     gap: spacing.sm,
   },
-  title: { fontSize: font.title, fontWeight: '700', color: colors.text, textAlign: 'center' },
-  muted: { fontSize: font.body, color: colors.textMuted, textAlign: 'center' },
   action: { marginTop: spacing.md },
+  text: { alignItems: 'center', gap: spacing.sm },
+  halo: {
+    width: 120,
+    height: 120,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceMuted,
+    marginBottom: spacing.md,
+  },
+  image: { width: 64, height: 64 },
 });

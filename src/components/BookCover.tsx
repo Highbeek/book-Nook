@@ -1,9 +1,10 @@
 import { Image } from 'expo-image';
 import { memo } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { coverUrl, type CoverSize } from '@/api/books';
 import { colors, radius } from '@/theme';
+import { AppText } from './AppText';
 
 export interface BookCoverProps {
   coverId: number | null;
@@ -22,9 +23,15 @@ function BookCoverComponent({ coverId, title, width, height, size = 'M', style }
   if (!uri) {
     return (
       <View style={[box, styles.fallback]}>
-        <Text style={styles.fallbackText} numberOfLines={3} aria-hidden>
+        <AppText
+          tone="muted"
+          align="center"
+          style={styles.fallbackText}
+          numberOfLines={3}
+          aria-hidden
+        >
           {title}
-        </Text>
+        </AppText>
       </View>
     );
   }
@@ -49,5 +56,5 @@ export const BookCover = memo(BookCoverComponent);
 const styles = StyleSheet.create({
   box: { borderRadius: radius.sm, overflow: 'hidden', backgroundColor: colors.surfaceMuted },
   fallback: { alignItems: 'center', justifyContent: 'center', padding: 6 },
-  fallbackText: { fontSize: 10, color: colors.textMuted, textAlign: 'center' },
+  fallbackText: { fontSize: 10 },
 });

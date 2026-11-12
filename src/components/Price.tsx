@@ -1,8 +1,9 @@
 import { memo } from 'react';
-import { StyleSheet, Text, type StyleProp, type TextStyle } from 'react-native';
+import { StyleSheet, type StyleProp, type TextStyle } from 'react-native';
 
 import { colors, font } from '@/theme';
 import { formatPrice } from '@/utils/currency';
+import { AppText } from './AppText';
 
 export type PriceVariant = 'default' | 'large' | 'total';
 
@@ -18,14 +19,14 @@ export interface PriceProps {
 function PriceComponent({ amount, quantity = 1, variant = 'default', style, testID }: PriceProps) {
   const label = formatPrice(amount * quantity);
   return (
-    <Text
+    <AppText
       testID={testID}
       style={[styles.base, styles[variant], style]}
       aria-label={`Price ${label}`}
       numberOfLines={1}
     >
       {label}
-    </Text>
+    </AppText>
   );
 }
 

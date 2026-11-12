@@ -3,7 +3,7 @@
  * APIs the app uses: animations finish instantly and animated components render as plain ones.
  */
 import type { ComponentType } from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import { FlatList, Image, ScrollView, Text, View } from 'react-native';
 
 type AnimationCallback = (finished: boolean) => void;
 
@@ -20,6 +20,7 @@ const Animated = {
   Text: createAnimatedComponent(Text),
   Image: createAnimatedComponent(Image),
   ScrollView: createAnimatedComponent(ScrollView),
+  FlatList,
   createAnimatedComponent,
 };
 
@@ -61,7 +62,21 @@ export function interpolate(value: number, input: number[], output: number[]) {
   return output[output.length - 1];
 }
 
+export const withDelay = <T,>(_delayMs: number, value: T) => value;
+export const withRepeat = <T,>(value: T) => value;
+
+/** Layout-animation builders (FadeInDown.delay(…).springify()…): every call chains to itself. */
+const builder: Record<string, unknown> = new Proxy({}, { get: () => () => builder });
+export const FadeIn = builder;
+export const FadeInDown = builder;
+export const FadeOut = builder;
+export const FadeOutLeft = builder;
+export const LinearTransition = builder;
+export const ZoomIn = builder;
+export const ReduceMotion = { System: 'system', Always: 'always', Never: 'never' } as const;
+
 export const Easing = {
+  quad: identity,
   bezier: () => identity,
   linear: identity,
   ease: identity,

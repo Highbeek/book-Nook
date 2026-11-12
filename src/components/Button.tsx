@@ -2,12 +2,12 @@ import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
-  Text,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
 
-import { colors, font, radius, spacing } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
+import { AppText } from './AppText';
 
 export interface ButtonProps {
   label: string;
@@ -50,9 +50,9 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={primary ? colors.onPrimary : colors.primary} />
       ) : (
-        <Text style={[styles.label, primary ? styles.primaryLabel : styles.secondaryLabel]}>
+        <AppText weight="semibold" tone={primary ? 'inverse' : 'primary'}>
           {label}
-        </Text>
+        </AppText>
       )}
     </Pressable>
   );
@@ -71,7 +71,4 @@ const styles = StyleSheet.create({
   secondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary },
   secondaryPressed: { backgroundColor: colors.surfaceMuted },
   disabled: { opacity: 0.5 },
-  label: { fontSize: font.body, fontWeight: '600' },
-  primaryLabel: { color: colors.onPrimary },
-  secondaryLabel: { color: colors.primary },
 });
