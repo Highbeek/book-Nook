@@ -11,11 +11,6 @@ const mockPush = jest.fn();
 const mockDismissTo = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, dismissTo: mockDismissTo }),
-  // Render header buttons inline so tests can press them.
-  Stack: {
-    Screen: ({ options }: { options?: { headerRight?: () => React.ReactNode } }) =>
-      options?.headerRight?.() ?? null,
-  },
 }));
 
 /** Presses the button with `text` in the most recent Alert. */
