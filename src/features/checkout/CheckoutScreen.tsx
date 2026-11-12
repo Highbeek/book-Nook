@@ -1,10 +1,6 @@
 import { useRouter } from 'expo-router';
 import { Platform, StyleSheet, View } from 'react-native';
-import {
-  KeyboardAwareScrollView,
-  KeyboardToolbar,
-  type KeyboardToolbarProps,
-} from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import { AppText } from '@/components/AppText';
 import { Price } from '@/components/Price';
@@ -16,16 +12,6 @@ import { CheckoutForm } from './CheckoutForm';
 import type { PaymentProcessor, PaymentReceipt } from './paymentService';
 
 const emptyCartImage = require('../../../assets/icons/shopping-cart.png');
-
-const TOOLBAR_CLEARANCE = 64;
-
-const toolbarColors = {
-  primary: colors.primary,
-  disabled: colors.border,
-  background: colors.surfaceMuted,
-  ripple: colors.border,
-};
-const toolbarTheme: KeyboardToolbarProps['theme'] = { light: toolbarColors, dark: toolbarColors };
 
 export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
   const router = useRouter();
@@ -62,7 +48,7 @@ export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
     <View style={styles.screen}>
       <KeyboardAwareScrollView
         contentContainerStyle={styles.content}
-        bottomOffset={TOOLBAR_CLEARANCE}
+        bottomOffset={spacing.xl}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
       >
@@ -74,11 +60,6 @@ export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
         </View>
         <CheckoutForm amount={total} onSuccess={handleSuccess} pay={pay} />
       </KeyboardAwareScrollView>
-      <KeyboardToolbar theme={toolbarTheme}>
-        <KeyboardToolbar.Prev />
-        <KeyboardToolbar.Next />
-        <KeyboardToolbar.Done />
-      </KeyboardToolbar>
     </View>
   );
 }

@@ -134,8 +134,6 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
           autoComplete="cc-number"
           textContentType="creditCardNumber"
           placeholder="1234 5678 9012 3456"
-          {...nextFieldProps}
-          onSubmitEditing={() => setFocus('expiry')}
         />
         <View style={styles.row}>
           <FormTextField
@@ -147,8 +145,6 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
             autoComplete="cc-exp"
             placeholder="MM/YY"
             style={styles.half}
-            {...nextFieldProps}
-            onSubmitEditing={() => setFocus('cvc')}
           />
           <FormTextField
             control={control}
@@ -160,7 +156,6 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
             secureTextEntry
             placeholder="123"
             style={styles.half}
-            returnKeyType="done"
           />
         </View>
       </Animated.View>

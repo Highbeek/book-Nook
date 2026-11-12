@@ -24,7 +24,9 @@ describe('<CheckoutForm />', () => {
     await render(<CheckoutForm amount={100} onSuccess={jest.fn()} pay={jest.fn()} />);
 
     for (const label of ['Card number', 'Expiry (MM/YY)', 'CVC']) {
-      expect(screen.getByLabelText(label)).toHaveProp('inputMode', 'numeric');
+      const input = screen.getByLabelText(label);
+      expect(input).toHaveProp('inputMode', 'numeric');
+      expect(input).not.toHaveProp('returnKeyType');
     }
 
     await user.type(screen.getByLabelText('Card number'), '4242abcd4242');
