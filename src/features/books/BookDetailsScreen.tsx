@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useRef } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { BookDetail } from '@/api/types';
@@ -10,10 +10,12 @@ import { Price } from '@/components/Price';
 import { ErrorView, LoadingView } from '@/components/StateViews';
 import { selectQuantity, useCartStore } from '@/features/cart/cartStore';
 import { useAddToCart } from '@/features/cart/useAddToCart';
-import { colors, font, radius, spacing } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
 import type { ViewHandle } from '@/utils/refs';
 
+import { RatingSummary } from './RatingSummary';
 import { useBookDetails } from './useBookDetails';
+import { AppText } from '@/components/AppText';
 
 export function BookDetailsScreen() {
   const { id, title } = useLocalSearchParams<{ id: string; title?: string }>();
@@ -50,29 +52,36 @@ export function BookDetailsContent({ book }: { book: BookDetail }) {
               size="L"
             />
           </View>
-          <Text style={styles.title} role="heading">
+          <AppText variant="heading" align="center" style={styles.title} role="heading">
             {book.title}
-          </Text>
+          </AppText>
           {book.authors.length > 0 ? (
-            <Text style={styles.authors}>by {book.authors.join(', ')}</Text>
+            <AppText tone="muted" align="center">
+              by {book.authors.join(', ')}
+            </AppText>
           ) : null}
           {book.firstPublishYear ? (
-            <Text style={styles.meta}>First published {book.firstPublishYear}</Text>
+            <AppText variant="caption" tone="muted">
+              First published {book.firstPublishYear}
+            </AppText>
           ) : null}
           <Price amount={book.price} variant="large" testID="details-price" />
         </View>
 
-        <Text style={styles.sectionTitle}>About this book</Text>
-        <Text style={styles.body}>{book.description ?? 'No description available.'}</Text>
+        <AppText variant="title">About this book</AppText>
+        <AppText style={styles.body}>{book.description ?? 'No description available.'}</AppText>
+
+        <AppText variant="title">Reader reviews</AppText>
+        <RatingSummary rating={book.rating} />
 
         {book.subjects.length > 0 ? (
           <>
-            <Text style={styles.sectionTitle}>Subjects</Text>
+            <AppText variant="title">Subjects</AppText>
             <View style={styles.chips}>
               {book.subjects.map((subject) => (
-                <Text key={subject} style={styles.chip}>
+                <AppText variant="caption" tone="muted" style={styles.chip} key={subject}>
                   {subject}
-                </Text>
+                </AppText>
               ))}
             </View>
           </>
@@ -80,7 +89,11 @@ export function BookDetailsContent({ book }: { book: BookDetail }) {
       </ScrollView>
 
       <View style={[styles.bar, { paddingBottom: insets.bottom + spacing.md }]}>
-        {inCart > 0 ? <Text style={styles.inCart}>{inCart} in cart</Text> : null}
+        {inCart > 0 ? (
+          <AppText tone="success" weight="semibold">
+            {inCart} in cart
+          </AppText>
+        ) : null}
         <Button label="Add to cart" onPress={() => addToCart(book, coverRef)} style={styles.cta} />
       </View>
     </>
@@ -91,25 +104,14 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 120, gap: spacing.md },
   hero: { alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
-  title: {
-    fontSize: font.heading,
-    fontWeight: '700',
-    color: colors.text,
-    textAlign: 'center',
-    marginTop: spacing.md,
-  },
-  authors: { fontSize: font.body, color: colors.textMuted, textAlign: 'center' },
-  meta: { fontSize: font.caption, color: colors.textMuted },
-  sectionTitle: { fontSize: font.title, fontWeight: '700', color: colors.text },
-  body: { fontSize: font.body, lineHeight: 22, color: colors.text },
+  title: { marginTop: spacing.md },
+  body: { lineHeight: 22 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: radius.pill,
     backgroundColor: colors.surfaceMuted,
-    color: colors.textMuted,
-    fontSize: font.caption,
     overflow: 'hidden',
   },
   bar: {
@@ -126,6 +128,5 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-  inCart: { color: colors.success, fontWeight: '600' },
   cta: { flex: 1 },
 });

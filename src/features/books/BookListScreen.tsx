@@ -6,7 +6,6 @@ import {
   Pressable,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
   type ListRenderItem,
 } from 'react-native';
@@ -14,12 +13,13 @@ import {
 import type { BookSummary } from '@/api/types';
 import { EmptyView, ErrorView, LoadingView } from '@/components/StateViews';
 import { useAddToCart } from '@/features/cart/useAddToCart';
-import { colors, font, spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
 import { useDebouncedValue } from '@/utils/useDebouncedValue';
 
 import { BOOK_ROW_HEIGHT, BookRow } from './BookRow';
 import { SearchBar } from './SearchBar';
 import { useBooks } from './useBooks';
+import { AppText } from '@/components/AppText';
 
 export const SEARCH_DEBOUNCE_MS = 400;
 
@@ -100,9 +100,9 @@ export function BookListScreen() {
       <SearchBar value={search} onChangeText={setSearch} />
       {/* Kept outside the FlatList: a list header would offset rows and break getItemLayout. */}
       {total > 0 ? (
-        <Text style={styles.count}>
+        <AppText variant="caption" tone="muted" style={styles.count}>
           {query ? `${total.toLocaleString()} results` : `${total.toLocaleString()} books`}
-        </Text>
+        </AppText>
       ) : null}
       {renderBody()}
     </View>
@@ -130,11 +130,13 @@ function ListFooter({
   if (error) {
     return (
       <View style={styles.footer}>
-        <Text style={styles.footerText} role="alert">
+        <AppText variant="caption" tone="muted" align="center" role="alert">
           {error}
-        </Text>
+        </AppText>
         <Pressable role="button" aria-label="Retry loading more" onPress={onRetry} hitSlop={8}>
-          <Text style={styles.retry}>Retry</Text>
+          <AppText tone="primary" weight="bold">
+            Retry
+          </AppText>
         </Pressable>
       </View>
     );
@@ -142,7 +144,9 @@ function ListFooter({
   if (end) {
     return (
       <View style={styles.footer}>
-        <Text style={styles.footerText}>You’ve reached the end.</Text>
+        <AppText variant="caption" tone="muted" align="center">
+          You’ve reached the end.
+        </AppText>
       </View>
     );
   }
@@ -151,14 +155,7 @@ function ListFooter({
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  count: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-    fontSize: font.caption,
-    color: colors.textMuted,
-  },
+  count: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
   emptyContent: { flexGrow: 1 },
   footer: { padding: spacing.xl, alignItems: 'center', gap: spacing.sm },
-  footerText: { color: colors.textMuted, fontSize: font.caption, textAlign: 'center' },
-  retry: { color: colors.primary, fontWeight: '700' },
 });

@@ -8,9 +8,21 @@ export interface BookSummary {
   price: number;
 }
 
+export type StarValue = 1 | 2 | 3 | 4 | 5;
+
+export interface BookRating {
+  /** Mean star rating, 1–5. */
+  average: number;
+  count: number;
+  /** Number of ratings at each star value. */
+  distribution: Record<StarValue, number>;
+}
+
 export interface BookDetail extends BookSummary {
   description: string | null;
   subjects: string[];
+  /** Reader ratings; null when the book has none or they couldn't be loaded. */
+  rating: BookRating | null;
 }
 
 export interface BooksPage {
@@ -65,4 +77,9 @@ export interface OLWork {
 export interface OLAuthor {
   name?: string;
   personal_name?: string;
+}
+
+export interface OLRatings {
+  summary?: { average?: number | null; count?: number };
+  counts?: Partial<Record<'1' | '2' | '3' | '4' | '5', number>>;
 }

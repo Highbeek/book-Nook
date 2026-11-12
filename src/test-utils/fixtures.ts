@@ -17,6 +17,7 @@ export function makeBookDetail(overrides: Partial<BookDetail> = {}): BookDetail 
     ...makeBook(),
     description: 'Okonkwo, a proud Igbo warrior…',
     subjects: ['Nigeria', 'Fiction'],
+    rating: { average: 4.2, count: 120, distribution: { 1: 5, 2: 5, 3: 10, 4: 30, 5: 70 } },
     ...overrides,
   };
 }

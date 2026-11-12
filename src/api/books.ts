@@ -1,12 +1,14 @@
 import { env } from '@/config/env';
 
-import { ApiError, createAbortError, fetchJson } from './client';
+import { ApiError, createAbortError, fetchJson, isAbortError } from './client';
 import { priceFor } from './pricing';
 import type {
   BookDetail,
+  BookRating,
   BookSummary,
   BooksPage,
   OLAuthor,
+  OLRatings,
   OLSearchDoc,
   OLSearchResponse,
   OLSubjectResponse,
@@ -147,6 +149,27 @@ async function fetchAuthorNames(work: OLWork, signal?: AbortSignal): Promise<str
     .filter((name): name is string => Boolean(name));
 }
 
+const STAR_VALUES = [1, 2, 3, 4, 5] as const;
+
+export function mapRatings(data: OLRatings): BookRating | null {
+  const average = data.summary?.average;
+  const count = data.summary?.count ?? 0;
+  if (!count || typeof average !== 'number' || !Number.isFinite(average)) return null;
+  const distribution = {} as BookRating['distribution'];
+  for (const star of STAR_VALUES) distribution[star] = data.counts?.[star] ?? 0;
+  return { average, count, distribution };
+}
+
+/** Ratings are a nice-to-have: a failed lookup shows "no ratings" rather than failing the screen. */
+async function fetchRating(workKey: string, signal?: AbortSignal): Promise<BookRating | null> {
+  try {
+    return mapRatings(await fetchJson<OLRatings>(`${API_BASE}${workKey}/ratings.json`, { signal }));
+  } catch (error) {
+    if (isAbortError(error)) throw error;
+    return null;
+  }
+}
+
 export async function getBookById(id: string, signal?: AbortSignal): Promise<BookDetail> {
   let work = await fetchJson<OLWork>(`${API_BASE}/works/${encodeURIComponent(id)}.json`, {
     signal,
@@ -158,7 +181,10 @@ export async function getBookById(id: string, signal?: AbortSignal): Promise<Boo
     throw new ApiError('This book could not be found.', 'http', 404);
   }
 
-  const authors = await fetchAuthorNames(work, signal);
+  const [authors, rating] = await Promise.all([
+    fetchAuthorNames(work, signal),
+    fetchRating(work.key, signal),
+  ]);
   // Keep the requested ID (not a redirect target) so the price matches the list row.
   const summary = makeSummary(
     id,
@@ -172,5 +198,6 @@ export async function getBookById(id: string, signal?: AbortSignal): Promise<Boo
     ...summary,
     description: descriptionText(work.description),
     subjects: (work.subjects ?? []).slice(0, 8),
+    rating,
   };
 }

@@ -1,11 +1,12 @@
 import { memo, useRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { BookSummary } from '@/api/types';
 import { BookCover } from '@/components/BookCover';
 import { Price } from '@/components/Price';
-import { colors, font, radius, spacing } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
 import type { ViewHandle, ViewRef } from '@/utils/refs';
+import { AppText } from '@/components/AppText';
 
 /** Fixed height so FlatList can use getItemLayout instead of measuring rows. */
 export const BOOK_ROW_HEIGHT = 120;
@@ -40,12 +41,12 @@ function BookRowComponent({ book, onPress, onAddToCart }: BookRowProps) {
         />
       </View>
       <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={2}>
+        <AppText weight="semibold" numberOfLines={2}>
           {book.title}
-        </Text>
-        <Text style={styles.meta} numberOfLines={1}>
+        </AppText>
+        <AppText variant="caption" tone="muted" numberOfLines={1}>
           {byline || 'Unknown author'}
-        </Text>
+        </AppText>
         <View style={styles.footer}>
           <Price amount={book.price} />
           <Pressable
@@ -55,7 +56,9 @@ function BookRowComponent({ book, onPress, onAddToCart }: BookRowProps) {
             onPress={() => onAddToCart(book, coverRef)}
             style={({ pressed }) => [styles.add, pressed && styles.addPressed]}
           >
-            <Text style={styles.addText}>Add</Text>
+            <AppText variant="caption" tone="primary" weight="semibold">
+              Add
+            </AppText>
           </Pressable>
         </View>
       </View>
@@ -78,8 +81,6 @@ const styles = StyleSheet.create({
   },
   pressed: { backgroundColor: colors.surfaceMuted },
   info: { flex: 1, height: COVER_HEIGHT, justifyContent: 'space-between' },
-  title: { fontSize: font.body, fontWeight: '600', color: colors.text },
-  meta: { fontSize: font.caption, color: colors.textMuted },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   add: {
     paddingHorizontal: spacing.lg,
@@ -89,5 +90,4 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   addPressed: { backgroundColor: colors.surfaceMuted },
-  addText: { color: colors.primary, fontWeight: '600', fontSize: font.caption },
 });

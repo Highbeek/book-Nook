@@ -44,6 +44,7 @@ describe('<BookDetailsScreen />', () => {
     expect(screen.getByText('by Chinua Achebe')).toBeOnTheScreen();
     expect(screen.getByTestId('details-price')).toHaveTextContent('₦4,500');
     expect(screen.getByText('Okonkwo, a proud Igbo warrior…')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Rated 4.2 out of 5 from 120 ratings')).toBeOnTheScreen();
     expect(screen.queryByRole('progressbar')).not.toBeOnTheScreen();
   });
 
@@ -71,10 +72,11 @@ describe('<BookDetailsScreen />', () => {
     expect(mockGetBookById).toHaveBeenCalledTimes(2);
   });
 
-  it('falls back gracefully when the book has no description', async () => {
-    mockGetBookById.mockResolvedValue({ ...book, description: null, subjects: [] });
+  it('falls back gracefully when the book has no description or ratings', async () => {
+    mockGetBookById.mockResolvedValue({ ...book, description: null, subjects: [], rating: null });
     await render(<BookDetailsScreen />);
     expect(await screen.findByText('No description available.')).toBeOnTheScreen();
+    expect(screen.getByText('No reader ratings yet.')).toBeOnTheScreen();
   });
 
   it('adds the book to the cart', async () => {

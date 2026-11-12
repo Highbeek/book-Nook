@@ -3,6 +3,7 @@ import {
   coverUrl,
   getBookById,
   getBooks,
+  mapRatings,
   mapSearchDoc,
   mapSubjectWork,
 } from '../books';
@@ -156,9 +157,15 @@ describe('getBookById', () => {
     authors: [{ author: { key: '/authors/OL79034A' } }, { author: { key: '/authors/BAD' } }],
   };
 
-  it('fetches the work and its authors, tolerating a failed author lookup', async () => {
+  const ratings = {
+    summary: { average: 3.96, count: 122 },
+    counts: { '1': 11, '2': 6, '3': 18, '4': 29, '5': 58 },
+  };
+
+  it('fetches the work, its authors and ratings, tolerating a failed author lookup', async () => {
     const fetchFn = mockFetch().mockImplementation(async (url: string) => {
       if (url.endsWith('/works/OL893415W.json')) return mockResponse(work);
+      if (url.endsWith('/works/OL893415W/ratings.json')) return mockResponse(ratings);
       if (url.endsWith('/authors/OL79034A.json')) return mockResponse({ name: 'Frank Herbert' });
       return mockResponse({}, { status: 404 });
     });
@@ -169,6 +176,7 @@ describe('getBookById', () => {
       'https://openlibrary.org/works/OL893415W.json',
       'https://openlibrary.org/authors/OL79034A.json',
       'https://openlibrary.org/authors/BAD.json',
+      'https://openlibrary.org/works/OL893415W/ratings.json',
     ]);
     expect(book).toEqual({
       id: 'OL893415W',
@@ -179,7 +187,31 @@ describe('getBookById', () => {
       price: priceFor('OL893415W'),
       description: 'A desert planet.',
       subjects: ['Science fiction', 'Deserts'],
+      rating: { average: 3.96, count: 122, distribution: { 1: 11, 2: 6, 3: 18, 4: 29, 5: 58 } },
     });
+  });
+
+  it('still returns the book when the ratings lookup fails', async () => {
+    mockFetch().mockImplementation(async (url: string) =>
+      url.endsWith('/ratings.json')
+        ? mockResponse({}, { status: 500 })
+        : mockResponse({ key: '/works/OL3W', title: 'No ratings' }),
+    );
+    await expect(getBookById('OL3W')).resolves.toMatchObject({ title: 'No ratings', rating: null });
+  });
+
+  it('reads ratings from the canonical work after a redirect', async () => {
+    const fetchFn = mockFetch().mockImplementation(async (url: string) =>
+      url.endsWith('/works/OLOLDW.json')
+        ? mockResponse({
+            key: '/works/OLOLDW',
+            type: { key: '/type/redirect' },
+            location: '/works/OLNEWW',
+          })
+        : mockResponse({ key: '/works/OLNEWW', title: 'Canonical' }),
+    );
+    await getBookById('OLOLDW');
+    expect(fetchedUrls(fetchFn)).toContain('https://openlibrary.org/works/OLNEWW/ratings.json');
   });
 
   it('accepts a plain-string description', async () => {
@@ -205,5 +237,23 @@ describe('getBookById', () => {
   it('fails with a not-found error when the work fetch 404s', async () => {
     mockFetch().mockResolvedValue(mockResponse({}, { status: 404 }));
     await expect(getBookById('OLMISSINGW')).rejects.toMatchObject({ status: 404 });
+  });
+});
+
+describe('mapRatings', () => {
+  it('fills missing star buckets with 0', () => {
+    expect(mapRatings({ summary: { average: 5, count: 2 }, counts: { '5': 2 } })).toEqual({
+      average: 5,
+      count: 2,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 2 },
+    });
+  });
+
+  it.each([
+    ['no summary', {}],
+    ['zero ratings', { summary: { average: null, count: 0 } }],
+    ['a null average', { summary: { average: null, count: 3 } }],
+  ])('returns null for %s', (_, data) => {
+    expect(mapRatings(data)).toBeNull();
   });
 });

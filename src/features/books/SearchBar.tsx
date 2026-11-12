@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { colors, font, radius, spacing } from '@/theme';
+import { AppText } from '@/components/AppText';
 
 export interface SearchBarProps {
   value: string;
@@ -37,7 +38,7 @@ export function SearchBar({ value, onChangeText }: SearchBarProps) {
             hitSlop={10}
             style={styles.clear}
           >
-            <Text style={styles.clearText}>✕</Text>
+            <AppText tone="muted">✕</AppText>
           </Pressable>
         ) : null}
       </View>
@@ -48,7 +49,9 @@ export function SearchBar({ value, onChangeText }: SearchBarProps) {
           onPress={() => Keyboard.dismiss()}
           hitSlop={10}
         >
-          <Text style={styles.cancel}>Cancel</Text>
+          <AppText tone="primary" weight="semibold">
+            Cancel
+          </AppText>
         </Pressable>
       ) : null}
     </View>
@@ -75,6 +78,4 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, height: 44, fontSize: font.body, color: colors.text },
   clear: { padding: spacing.xs },
-  clearText: { color: colors.textMuted, fontSize: font.body },
-  cancel: { color: colors.primary, fontSize: font.body, fontWeight: '600' },
 });
