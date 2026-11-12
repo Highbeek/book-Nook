@@ -4,13 +4,16 @@ A React Native (Expo + TypeScript) bookstore app. Browse and search over 600,000
 
 ## Setup
 
-Requires Node 22.13+ and the iOS Simulator, an Android emulator, or Expo Go on a phone.
+Requires Node 22.13+ and one of: the iOS Simulator, an Android emulator, or the latest [Expo Go](https://expo.dev/go) on a phone. The app uses Expo SDK 58, so update Expo Go if it reports the project as incompatible.
 
 ```bash
+git clone https://github.com/Highbeek/book-Nook.git
+cd book-Nook
 npm install
 npm start          # press i (iOS) or a (Android), or scan the QR code with Expo Go
-npm test           # run the test suite
 ```
+
+`npm run ios` and `npm run android` open a simulator directly. On a physical phone, keep it on the same Wi-Fi network as your computer.
 
 No API keys are needed. Book data comes from the public [Open Library API](https://openlibrary.org/developers/api), so the app needs a network connection. API hosts are set in `.env` and can be overridden in `.env.local`.
 
