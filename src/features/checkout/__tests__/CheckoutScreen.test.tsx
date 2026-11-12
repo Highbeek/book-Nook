@@ -1,6 +1,7 @@
 import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
 
 import { useCartStore } from '@/features/cart/cartStore';
+import { fillValidCheckoutForm } from '@/test-utils/checkout';
 import { makeBook } from '@/test-utils/fixtures';
 
 import { CheckoutScreen } from '../CheckoutScreen';
@@ -8,14 +9,6 @@ import { PaymentError } from '../paymentService';
 
 const mockReplace = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace }) }));
-
-async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText('Name on card'), 'Ada Lovelace');
-  await user.type(screen.getByLabelText('Email'), 'ada@example.com');
-  await user.type(screen.getByLabelText('Card number'), '4242424242424242');
-  await user.type(screen.getByLabelText('Expiry (MM/YY)'), '1230');
-  await user.type(screen.getByLabelText('CVC'), '123');
-}
 
 beforeEach(() => {
   mockReplace.mockReset();
@@ -39,7 +32,7 @@ describe('<CheckoutScreen />', () => {
       paidAt: '2026-11-12T10:00:00.000Z',
     });
     await render(<CheckoutScreen pay={pay} />);
-    await fillValidForm(user);
+    await fillValidCheckoutForm(user);
 
     await user.press(screen.getByRole('button', { name: 'Pay ₦7,500' }));
 
@@ -55,7 +48,7 @@ describe('<CheckoutScreen />', () => {
     const user = userEvent.setup();
     const pay = jest.fn().mockRejectedValue(new PaymentError('Your card was declined.'));
     await render(<CheckoutScreen pay={pay} />);
-    await fillValidForm(user);
+    await fillValidCheckoutForm(user);
 
     await user.press(screen.getByRole('button', { name: 'Pay ₦7,500' }));
 

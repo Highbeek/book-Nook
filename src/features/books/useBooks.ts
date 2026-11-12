@@ -45,7 +45,7 @@ const startStatus: Record<LoadMode, BooksStatus> = {
   refresh: 'refreshing',
 };
 
-/** Appends `incoming`, skipping IDs already present (APIs can repeat items across pages). */
+/** Open Library can repeat a work across pages, so drop IDs already loaded. */
 function appendUnique(existing: BookSummary[], incoming: BookSummary[]): BookSummary[] {
   const seen = new Set(existing.map((b) => b.id));
   const next = existing.slice();
@@ -63,7 +63,7 @@ export function booksReducer(state: BooksState, action: Action): BooksState {
     case 'start':
       return {
         ...state,
-        // A new query starts from a clean slate; refresh keeps old rows visible until data lands.
+        // Refresh keeps the old rows visible until the new page arrives.
         ...(action.mode === 'initial' ? { items: [], page: 0, total: 0, hasMore: true } : null),
         status: startStatus[action.mode],
         error: null,
@@ -85,12 +85,8 @@ export function booksReducer(state: BooksState, action: Action): BooksState {
 }
 
 /**
- * Paginated book feed for a query (empty query = browse).
- *
- * - Changing `query` aborts any in-flight request and restarts at page 1, so stale
- *   responses from an older query can never overwrite newer results.
- * - `loadMore` is a no-op while a request is in flight, at the end of the list, or after an
- *   error (so `onEndReached` can't spin in a retry loop) — `retry` is the explicit recovery path.
+ * Paginated feed for `query` (empty = browse). `loadMore` does nothing while a request is in
+ * flight, at the end, or after an error, so `onEndReached` can't loop; `retry` recovers.
  */
 export function useBooks(query: string, pageSize = DEFAULT_PAGE_SIZE) {
   const [state, dispatch] = useReducer(booksReducer, initialBooksState);

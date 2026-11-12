@@ -14,16 +14,8 @@ type Settled = { key: string } & (
 );
 
 /**
- * Lifecycle-driven fetch for the Book Details screen.
- *
- * - The effect runs on mount and whenever `id` changes or the user retries.
- * - Its cleanup aborts the in-flight request, so a slow response can never update an
- *   unmounted screen or overwrite a newer book.
- * - Each request has a key (`id` + attempt). Any result whose key doesn't match the current
- *   request is ignored, which means the screen shows `loading` until *this* request settles —
- *   never a stale book or stale error.
- * - Every request settles to success or error (the API client enforces a timeout), so the
- *   screen can't be stuck on the spinner.
+ * Results are keyed by `id` + retry attempt; a result for an older key is ignored, so the
+ * screen shows `loading` until the current request settles (never a stale book or error).
  */
 export function useBookDetails(id: string | undefined) {
   const [attempt, setAttempt] = useState(0);

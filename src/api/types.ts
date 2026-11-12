@@ -1,5 +1,4 @@
 export interface BookSummary {
-  /** Open Library work ID, e.g. "OL45804W". */
   id: string;
   title: string;
   authors: string[];
@@ -21,7 +20,7 @@ export interface BooksPage {
   hasMore: boolean;
 }
 
-// ---- Raw Open Library response shapes (only the fields we use) ----
+// Raw Open Library responses (only the fields we use).
 
 export interface OLSearchDoc {
   key: string;

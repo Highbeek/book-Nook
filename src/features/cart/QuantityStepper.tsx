@@ -8,7 +8,6 @@ export interface QuantityStepperProps {
   quantity: number;
   onIncrement: () => void;
   onDecrement: () => void;
-  /** Used in accessibility labels, e.g. the book title. */
   itemLabel: string;
 }
 

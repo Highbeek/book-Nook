@@ -15,7 +15,6 @@ import type {
 export const API_BASE = 'https://openlibrary.org';
 export const COVERS_BASE = 'https://covers.openlibrary.org';
 export const DEFAULT_PAGE_SIZE = 20;
-/** Browse feed shown when there is no search query. */
 export const BROWSE_SUBJECT = 'fiction';
 
 const SEARCH_FIELDS = 'key,title,author_name,cover_i,first_publish_year';
@@ -70,9 +69,7 @@ export function mapSubjectWork(work: OLSubjectWork): BookSummary {
 }
 
 export interface GetBooksParams {
-  /** Free-text search. Empty/whitespace means "browse". */
   query?: string;
-  /** 1-based page number. */
   page?: number;
   limit?: number;
   signal?: AbortSignal;
@@ -100,7 +97,6 @@ export function buildBooksUrl({
   return `${API_BASE}/subjects/${BROWSE_SUBJECT}.json?${params.toString()}`;
 }
 
-/** Fetches one page of books — search results when `query` is set, otherwise the browse feed. */
 export async function getBooks(params: GetBooksParams = {}): Promise<BooksPage> {
   const { query = '', page = 1, limit = DEFAULT_PAGE_SIZE, signal } = params;
   const url = buildBooksUrl({ query, page, limit });
@@ -117,7 +113,7 @@ export async function getBooks(params: GetBooksParams = {}): Promise<BooksPage> 
     total = data.work_count ?? 0;
   }
 
-  // A short page also means we're at the end, even if `total` over-reports.
+  // A short page means the end, even if `total` over-reports.
   const hasMore = items.length === limit && page * limit < total;
   return { items, page, total, hasMore };
 }
@@ -139,7 +135,7 @@ async function fetchAuthorNames(work: OLWork, signal?: AbortSignal): Promise<str
     .filter((key): key is string => Boolean(key))
     .slice(0, MAX_AUTHORS_FETCHED);
 
-  // Author names are nice-to-have: one failing lookup must not fail the whole screen.
+  // One failed author lookup shouldn't fail the whole screen.
   const results = await Promise.allSettled(
     keys.map((key) => fetchJson<OLAuthor>(`${API_BASE}${key}.json`, { signal })),
   );
@@ -149,7 +145,6 @@ async function fetchAuthorNames(work: OLWork, signal?: AbortSignal): Promise<str
     .filter((name): name is string => Boolean(name));
 }
 
-/** Fetches full details for one work, following a single Open Library redirect if needed. */
 export async function getBookById(id: string, signal?: AbortSignal): Promise<BookDetail> {
   let work = await fetchJson<OLWork>(`${API_BASE}/works/${encodeURIComponent(id)}.json`, {
     signal,

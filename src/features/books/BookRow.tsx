@@ -7,7 +7,7 @@ import { Price } from '@/components/Price';
 import { colors, font, radius, spacing } from '@/theme';
 import type { ViewHandle, ViewRef } from '@/utils/refs';
 
-/** Fixed row height lets FlatList skip measurement entirely via getItemLayout. */
+/** Fixed height so FlatList can use getItemLayout instead of measuring rows. */
 export const BOOK_ROW_HEIGHT = 120;
 const COVER_WIDTH = 64;
 const COVER_HEIGHT = 96;
@@ -63,7 +63,6 @@ function BookRowComponent({ book, onPress, onAddToCart }: BookRowProps) {
   );
 }
 
-/** Memoised: rows only re-render when their book or the (stable) callbacks change. */
 export const BookRow = memo(BookRowComponent);
 
 const styles = StyleSheet.create({

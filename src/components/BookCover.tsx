@@ -14,10 +14,7 @@ export interface BookCoverProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/**
- * Lazily loaded, disk+memory cached cover. `recyclingKey` stops a recycled list cell from
- * briefly flashing the previous book's cover while the new one loads.
- */
+/** `recyclingKey` stops a recycled list cell flashing the previous book's cover. */
 function BookCoverComponent({ coverId, title, width, height, size = 'M', style }: BookCoverProps) {
   const uri = coverUrl(coverId, size);
   const box = [styles.box, { width, height }, style];
@@ -25,7 +22,6 @@ function BookCoverComponent({ coverId, title, width, height, size = 'M', style }
   if (!uri) {
     return (
       <View style={[box, styles.fallback]}>
-        {/* Decorative: the title is already announced next to the cover. */}
         <Text style={styles.fallbackText} numberOfLines={3} aria-hidden>
           {title}
         </Text>

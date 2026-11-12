@@ -9,7 +9,6 @@ export type PriceVariant = 'default' | 'large' | 'total';
 export interface PriceProps {
   /** Amount in minor units (kobo). */
   amount: number;
-  /** When set, the displayed amount is `amount * quantity`. */
   quantity?: number;
   variant?: PriceVariant;
   style?: StyleProp<TextStyle>;

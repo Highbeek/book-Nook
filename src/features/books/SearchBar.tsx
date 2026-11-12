@@ -8,11 +8,6 @@ export interface SearchBarProps {
   onChangeText: (text: string) => void;
 }
 
-/**
- * The keyboard can be closed three ways: the "Cancel" button shown while focused,
- * the keyboard's search key, or scrolling the list (keyboardDismissMode="on-drag").
- * Cancel keeps the current query — it only closes the keyboard.
- */
 export function SearchBar({ value, onChangeText }: SearchBarProps) {
   const [focused, setFocused] = useState(false);
 

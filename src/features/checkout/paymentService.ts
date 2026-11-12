@@ -1,16 +1,10 @@
 import { digitsOnly } from './validation';
 
 /**
- * MOCK payment gateway — no real money moves and no card data leaves the device.
- *
- * It mirrors the shape of a real hosted-payments integration (e.g. Paystack / Stripe):
- * 1. the card is exchanged for a single-use token ("tokenisation"),
- * 2. only the token + amount are sent to "charge",
- * 3. the raw card number is never stored, logged, or returned.
- * See the README for what a production implementation would need.
+ * Mock payment gateway. Mirrors a hosted-payments flow (tokenise, then charge) without moving
+ * money or keeping card data; see the README for a production setup.
  */
 
-/** Test card that always declines, like the real providers' test numbers. */
 export const DECLINED_TEST_CARD = '4000000000000002';
 export const DEFAULT_PAYMENT_DELAY_MS = 1200;
 
@@ -22,7 +16,6 @@ export interface CardDetails {
 }
 
 export interface PaymentRequest {
-  /** Minor units (kobo). */
   amount: number;
   email: string;
   card: CardDetails;
@@ -50,9 +43,11 @@ function randomRef(prefix: string) {
 
 async function tokenizeCard(card: CardDetails) {
   const number = digitsOnly(card.number);
-  if (number === DECLINED_TEST_CARD)
-    return { token: randomRef('tok'), last4: number.slice(-4), declined: true };
-  return { token: randomRef('tok'), last4: number.slice(-4), declined: false };
+  return {
+    token: randomRef('tok'),
+    last4: number.slice(-4),
+    declined: number === DECLINED_TEST_CARD,
+  };
 }
 
 export async function processPayment(

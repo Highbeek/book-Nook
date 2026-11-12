@@ -15,7 +15,6 @@ export class ApiError extends Error {
 export const DEFAULT_TIMEOUT_MS = 15_000;
 
 export interface RequestOptions {
-  /** Caller-owned signal, e.g. aborted on unmount or when a newer request supersedes this one. */
   signal?: AbortSignal;
   timeoutMs?: number;
 }
@@ -31,14 +30,11 @@ export function createAbortError(): Error {
 }
 
 /**
- * Thin wrapper over fetch that:
- * - enforces a timeout so a hung request can never leave the UI on a spinner forever,
- * - normalises failures into a typed ApiError with a user-presentable message,
- * - lets caller cancellation (AbortError) pass through untouched so callers can ignore it.
+ * fetch with a timeout and typed, user-presentable errors. Caller aborts are rethrown as
+ * AbortError so callers can ignore them.
  */
 export async function fetchJson<T>(url: string, options: RequestOptions = {}): Promise<T> {
   const { signal, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
-  // Already cancelled (e.g. the screen unmounted): don't touch the network at all.
   if (signal?.aborted) throw createAbortError();
 
   const controller = new AbortController();

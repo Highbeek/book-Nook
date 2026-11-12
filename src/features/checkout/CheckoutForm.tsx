@@ -26,7 +26,6 @@ export interface CheckoutFormProps {
   /** Amount to charge, in minor units. */
   amount: number;
   onSuccess: (receipt: PaymentReceipt) => void;
-  /** Injected for tests; defaults to the mock gateway. */
   pay?: PaymentProcessor;
 }
 
@@ -36,7 +35,7 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  // Guards against double-charging on a fast double tap, before React re-renders the button.
+  // Blocks a double tap from charging twice before the disabled state renders.
   const inFlight = useRef(false);
 
   const update = (field: keyof CheckoutValues, raw: string) => {
@@ -51,7 +50,7 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
     const next = { ...values, [field]: formatted };
     setValues(next);
     setPaymentError(null);
-    // Only re-validate live after the first submit attempt, so users aren't nagged mid-typing.
+    // Validate live only after the first submit, so users aren't nagged while typing.
     if (submitted) setErrors(validateCheckout(next));
   };
 
@@ -76,8 +75,6 @@ export function CheckoutForm({ amount, onSuccess, pay = processPayment }: Checko
           name: values.fullName.trim(),
         },
       });
-      // Drop card details from memory as soon as they're no longer needed.
-      setValues(emptyCheckoutValues);
       onSuccess(receipt);
     } catch (error) {
       setPaymentError(

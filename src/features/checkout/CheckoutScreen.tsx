@@ -17,7 +17,7 @@ export function CheckoutScreen({ pay }: { pay?: PaymentProcessor }) {
 
   const handleSuccess = (receipt: PaymentReceipt) => {
     clear();
-    // replace: "back" from the receipt must not return to a checkout for an empty cart.
+    // replace, so "back" can't return to checkout with an empty cart.
     router.replace({
       pathname: '/order-confirmation',
       params: {

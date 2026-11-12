@@ -51,9 +51,8 @@ export interface FlyToCartItem {
 }
 
 interface FlyToCartContextValue {
-  /** Registers a cart icon as the flight target. Returns an unregister function. */
+  /** Returns an unregister function. */
   registerTarget: (ref: ViewRef) => () => void;
-  /** Launches a cover from `source` to the cart icon, then bumps the icon. */
   fly: (source: ViewRef | null, item: FlyToCartItem) => void;
   bump: SharedValue<number>;
 }
@@ -90,7 +89,7 @@ function FlyingCover({ flight, onDone }: { flight: Flight; onDone: (id: number) 
 
   const style = useAnimatedStyle(() => {
     const p = progress.value;
-    // Parabolic lift on top of the straight line gives the throw a natural arc.
+    // Parabolic lift turns the straight path into an arc.
     const arc = -ARC_HEIGHT * 4 * p * (1 - p);
     return {
       opacity: interpolate(p, [0, 0.85, 1], [1, 0.9, 0]),
@@ -167,7 +166,7 @@ export function FlyToCartProvider({ children }: { children: ReactNode }) {
         bumpCart();
         return;
       }
-      // Fallback: header's trailing edge, if the icon can't be measured.
+      // If the icon can't be measured, aim at the header's trailing edge.
       const to = measuredTo ?? { x: windowWidth - 44, y: insets.top + 8, width: 28, height: 28 };
       const id = ++nextId.current;
       setFlights((current) => [...current, { id, from, to, ...item }]);
@@ -195,13 +194,12 @@ const fallbackContext: Omit<FlyToCartContextValue, 'bump'> = {
   fly: noop,
 };
 
-/** Safe outside the provider (e.g. isolated component tests): animation simply doesn't run. */
+/** Outside the provider the animation is a no-op. */
 export function useFlyToCart() {
   const ctx = useContext(FlyToCartContext);
   return ctx?.fly ?? fallbackContext.fly;
 }
 
-/** Wires a cart icon up as the flight target and returns its bump animation style. */
 export function useCartTarget(ref: ViewRef) {
   const ctx = useContext(FlyToCartContext);
   const fallbackBump = useSharedValue(1);

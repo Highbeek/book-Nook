@@ -31,7 +31,6 @@ export function formatExpiry(value: string): string {
   return digits.length <= 2 ? digits : `${digits.slice(0, 2)}/${digits.slice(2)}`;
 }
 
-/** Luhn checksum — catches typos in card numbers before any network call. */
 export function isValidLuhn(cardNumber: string): boolean {
   const digits = digitsOnly(cardNumber);
   if (digits.length < 12 || digits.length > 19) return false;
@@ -49,7 +48,6 @@ export function isValidLuhn(cardNumber: string): boolean {
   return sum % 10 === 0;
 }
 
-/** Valid if MM/YY is a real month and not before the current month. */
 export function isValidExpiry(expiry: string, now: Date = new Date()): boolean {
   const match = expiry.match(/^(\d{2})\/(\d{2})$/);
   if (!match) return false;

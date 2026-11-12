@@ -1,11 +1,6 @@
 /**
- * Minimal Reanimated test double.
- *
- * Reanimated 4.7's bundled `mock` boots its real runtime, which needs native modules (and DOM
- * APIs on the JS fallback) that Jest doesn't have. The app only uses a small surface, so we
- * stub exactly that: animations resolve instantly to their target value, and animated
- * components render as plain host components. Animation *timing* is not unit-tested; the
- * cart state the animation decorates is.
+ * Reanimated 4.7's bundled mock needs native modules Jest doesn't have, so this stubs only the
+ * APIs the app uses: animations finish instantly and animated components render as plain ones.
  */
 import type { ComponentType } from 'react';
 import { Image, ScrollView, Text, View } from 'react-native';
@@ -14,7 +9,6 @@ type AnimationCallback = (finished: boolean) => void;
 
 const identity = <T,>(v: T) => v;
 
-// React 19: `ref` is an ordinary prop, so it flows through `props` without forwardRef.
 function createAnimatedComponent<P extends object>(Component: ComponentType<P>) {
   return function AnimatedComponent(props: P) {
     return <Component {...props} />;
@@ -57,7 +51,6 @@ export function withSpring<T>(toValue: T, _config?: unknown, callback?: Animatio
 export const withSequence = <T,>(...values: T[]) => values[values.length - 1];
 
 export function interpolate(value: number, input: number[], output: number[]) {
-  // Linear interpolation, clamped — enough for style computation in tests.
   if (value <= input[0]) return output[0];
   for (let i = 1; i < input.length; i++) {
     if (value <= input[i]) {

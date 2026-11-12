@@ -1,5 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
 
+import { fillValidCheckoutForm } from '@/test-utils/checkout';
 import { deferred } from '@/test-utils/deferred';
 
 import { CheckoutForm } from '../CheckoutForm';
@@ -11,14 +12,6 @@ const receipt: PaymentReceipt = {
   last4: '4242',
   paidAt: '2026-11-12T10:00:00.000Z',
 };
-
-async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText('Name on card'), 'Ada Lovelace');
-  await user.type(screen.getByLabelText('Email'), 'ada@example.com');
-  await user.type(screen.getByLabelText('Card number'), '4242424242424242');
-  await user.type(screen.getByLabelText('Expiry (MM/YY)'), '1230');
-  await user.type(screen.getByLabelText('CVC'), '123');
-}
 
 describe('<CheckoutForm />', () => {
   it('shows the amount on the pay button', async () => {
@@ -67,7 +60,7 @@ describe('<CheckoutForm />', () => {
     const pay = jest.fn().mockReturnValue(payment.promise);
     const onSuccess = jest.fn();
     await render(<CheckoutForm amount={7_500_00} onSuccess={onSuccess} pay={pay} />);
-    await fillValidForm(user);
+    await fillValidCheckoutForm(user);
 
     await user.press(screen.getByRole('button', { name: 'Pay ₦7,500' }));
 
@@ -102,7 +95,7 @@ describe('<CheckoutForm />', () => {
       );
     const onSuccess = jest.fn();
     await render(<CheckoutForm amount={7_500_00} onSuccess={onSuccess} pay={pay} />);
-    await fillValidForm(user);
+    await fillValidCheckoutForm(user);
 
     await user.press(screen.getByRole('button', { name: 'Pay ₦7,500' }));
 
@@ -115,7 +108,7 @@ describe('<CheckoutForm />', () => {
     const user = userEvent.setup();
     const pay = jest.fn().mockRejectedValue(new Error('socket hang up'));
     await render(<CheckoutForm amount={100} onSuccess={jest.fn()} pay={pay} />);
-    await fillValidForm(user);
+    await fillValidCheckoutForm(user);
 
     await user.press(screen.getByRole('button', { name: /^Pay/ }));
 

@@ -6,7 +6,6 @@ import type { BookSummary } from '@/api/types';
 
 export const MAX_QUANTITY = 99;
 
-/** The slice of a book the cart needs, so persisted carts stay small and stable. */
 export type CartBook = Pick<BookSummary, 'id' | 'title' | 'authors' | 'coverId' | 'price'>;
 
 export interface CartLine {
@@ -15,11 +14,10 @@ export interface CartLine {
 }
 
 export interface CartState {
-  /** Ordered by when each book was first added. */
   lines: CartLine[];
   addItem: (book: CartBook, quantity?: number) => void;
   removeItem: (bookId: string) => void;
-  /** Sets an exact quantity. 0 or less removes the line; values are clamped to MAX_QUANTITY. */
+  /** 0 or less removes the line; values are clamped to MAX_QUANTITY. */
   setQuantity: (bookId: string, quantity: number) => void;
   increment: (bookId: string) => void;
   decrement: (bookId: string) => void;
@@ -91,13 +89,11 @@ export const useCartStore = create<CartState>()(
   ),
 );
 
-// ---- Selectors (return primitives so subscribers only re-render when the value changes) ----
+// Selectors return primitives so subscribers re-render only when the value changes.
 
-/** Total in minor units. Integer math, so no floating-point drift. */
 export const selectTotal = (state: Pick<CartState, 'lines'>): number =>
   state.lines.reduce((sum, l) => sum + l.book.price * l.quantity, 0);
 
-/** Number of copies across all lines (what the cart badge shows). */
 export const selectItemCount = (state: Pick<CartState, 'lines'>): number =>
   state.lines.reduce((sum, l) => sum + l.quantity, 0);
 
