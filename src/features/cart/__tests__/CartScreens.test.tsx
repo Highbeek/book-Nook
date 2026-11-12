@@ -28,7 +28,6 @@ jest.mock('expo-router', () => ({
   }),
 }));
 
-/** Presses the button with `text` in the most recent Alert. */
 function pressAlertButton(text: string) {
   const buttons = jest.mocked(Alert.alert).mock.lastCall?.[2] as AlertButton[];
   buttons.find((b) => b.text === text)?.onPress?.();
@@ -66,7 +65,7 @@ describe('<CartScreen />', () => {
     await render(<CartScreen />);
     expect(screen.getByText('Your cart is empty')).toBeOnTheScreen();
     await user.press(screen.getByRole('button', { name: 'Browse books' }));
-    // A fresh home screen replaces the whole stack, so back can't return to the empty cart.
+
     expect(mockReset).toHaveBeenCalledWith(
       expect.objectContaining({ key: 'stack-1', index: 0, routes: [{ name: 'index' }] }),
     );

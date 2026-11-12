@@ -35,7 +35,7 @@ export function ErrorView({ message, onRetry }: { message: string; onRetry?: () 
 export interface EmptyViewProps {
   title: string;
   message?: string;
-  /** Optional illustration, shown in a soft circle above the title. */
+
   image?: ImageSource | number;
 }
 

@@ -24,8 +24,7 @@ export function CartScreen() {
   const clear = useCartStore((s) => s.clear);
   const router = useRouter();
   const resetStack = useResetStack();
-  // Start over on a fresh home screen: a forward (push) transition, with the old stack cleared
-  // so "back" can't return to the empty cart.
+
   const browseBooks = () => resetStack('index');
   const insets = useSafeAreaInsets();
   const footerStyle = [styles.footer, { paddingBottom: insets.bottom + spacing.md }];
@@ -63,7 +62,6 @@ export function CartScreen() {
           </AppText>
         </Pressable>
       </View>
-      {/* Removed rows slide out and the rows below glide up into the gap. */}
       <Animated.FlatList
         data={lines}
         keyExtractor={keyExtractor}

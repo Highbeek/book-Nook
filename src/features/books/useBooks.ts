@@ -10,7 +10,7 @@ export type BooksStatus = 'loading' | 'loadingMore' | 'refreshing' | 'ready' | '
 
 export interface BooksState {
   items: BookSummary[];
-  /** Last page successfully loaded (0 = none). */
+
   page: number;
   total: number;
   hasMore: boolean;
@@ -45,7 +45,6 @@ const startStatus: Record<LoadMode, BooksStatus> = {
   refresh: 'refreshing',
 };
 
-/** Open Library can repeat a work across pages, so drop IDs already loaded. */
 function appendUnique(existing: BookSummary[], incoming: BookSummary[]): BookSummary[] {
   const seen = new Set(existing.map((b) => b.id));
   const next = existing.slice();
@@ -63,7 +62,7 @@ export function booksReducer(state: BooksState, action: Action): BooksState {
     case 'start':
       return {
         ...state,
-        // Refresh keeps the old rows visible until the new page arrives.
+
         ...(action.mode === 'initial' ? { items: [], page: 0, total: 0, hasMore: true } : null),
         status: startStatus[action.mode],
         error: null,
@@ -84,10 +83,6 @@ export function booksReducer(state: BooksState, action: Action): BooksState {
   }
 }
 
-/**
- * Paginated feed for `query` (empty = browse). `loadMore` does nothing while a request is in
- * flight, at the end, or after an error, so `onEndReached` can't loop; `retry` recovers.
- */
 export function useBooks(query: string, pageSize = DEFAULT_PAGE_SIZE) {
   const [state, dispatch] = useReducer(booksReducer, initialBooksState);
   const inFlight = useRef<AbortController | null>(null);

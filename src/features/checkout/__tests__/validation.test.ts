@@ -9,9 +9,8 @@ import {
   type CheckoutValues,
 } from '../validation';
 
-const NOW = new Date(2026, 10, 12); // 12 Nov 2026
+const NOW = new Date(2026, 10, 12);
 
-/** First message per field, the way react-hook-form's yup resolver reports them. */
 function validate(values: CheckoutValues): Partial<Record<keyof CheckoutValues, string>> {
   try {
     checkoutSchema.validateSync(values, { abortEarly: false, context: { now: NOW } });

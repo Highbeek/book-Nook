@@ -17,7 +17,7 @@ export interface CartState {
   lines: CartLine[];
   addItem: (book: CartBook, quantity?: number) => void;
   removeItem: (bookId: string) => void;
-  /** 0 or less removes the line; values are clamped to MAX_QUANTITY. */
+
   setQuantity: (bookId: string, quantity: number) => void;
   increment: (bookId: string) => void;
   decrement: (bookId: string) => void;
@@ -88,8 +88,6 @@ export const useCartStore = create<CartState>()(
     },
   ),
 );
-
-// Selectors return primitives so subscribers re-render only when the value changes.
 
 export const selectTotal = (state: Pick<CartState, 'lines'>): number =>
   state.lines.reduce((sum, l) => sum + l.book.price * l.quantity, 0);

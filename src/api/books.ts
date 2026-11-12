@@ -30,7 +30,6 @@ export function coverUrl(coverId: number | null, size: CoverSize = 'M'): string 
   return coverId ? `${COVERS_BASE}/b/id/${coverId}-${size}.jpg` : null;
 }
 
-/** "/works/OL45804W" -> "OL45804W" */
 export function workIdFromKey(key: string): string {
   return key.replace(/^\/works\//, '');
 }
@@ -117,7 +116,6 @@ export async function getBooks(params: GetBooksParams = {}): Promise<BooksPage> 
     total = data.work_count ?? 0;
   }
 
-  // A short page means the end, even if `total` over-reports.
   const hasMore = items.length === limit && page * limit < total;
   return { items, page, total, hasMore };
 }
@@ -139,7 +137,6 @@ async function fetchAuthorNames(work: OLWork, signal?: AbortSignal): Promise<str
     .filter((key): key is string => Boolean(key))
     .slice(0, MAX_AUTHORS_FETCHED);
 
-  // One failed author lookup shouldn't fail the whole screen.
   const results = await Promise.allSettled(
     keys.map((key) => fetchJson<OLAuthor>(`${API_BASE}${key}.json`, { signal })),
   );
@@ -160,7 +157,6 @@ export function mapRatings(data: OLRatings): BookRating | null {
   return { average, count, distribution };
 }
 
-/** Ratings are a nice-to-have: a failed lookup shows "no ratings" rather than failing the screen. */
 async function fetchRating(workKey: string, signal?: AbortSignal): Promise<BookRating | null> {
   try {
     return mapRatings(await fetchJson<OLRatings>(`${API_BASE}${workKey}/ratings.json`, { signal }));
@@ -185,7 +181,7 @@ export async function getBookById(id: string, signal?: AbortSignal): Promise<Boo
     fetchAuthorNames(work, signal),
     fetchRating(work.key, signal),
   ]);
-  // Keep the requested ID (not a redirect target) so the price matches the list row.
+
   const summary = makeSummary(
     id,
     work.title,

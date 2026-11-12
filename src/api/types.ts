@@ -4,24 +4,23 @@ export interface BookSummary {
   authors: string[];
   coverId: number | null;
   firstPublishYear: number | null;
-  /** Price in minor units (kobo). */
+
   price: number;
 }
 
 export type StarValue = 1 | 2 | 3 | 4 | 5;
 
 export interface BookRating {
-  /** Mean star rating, 1–5. */
   average: number;
   count: number;
-  /** Number of ratings at each star value. */
+
   distribution: Record<StarValue, number>;
 }
 
 export interface BookDetail extends BookSummary {
   description: string | null;
   subjects: string[];
-  /** Reader ratings; null when the book has none or they couldn't be loaded. */
+
   rating: BookRating | null;
 }
 
@@ -31,8 +30,6 @@ export interface BooksPage {
   total: number;
   hasMore: boolean;
 }
-
-// Raw Open Library responses (only the fields we use).
 
 export interface OLSearchDoc {
   key: string;
@@ -69,7 +66,7 @@ export interface OLWork {
   covers?: number[];
   first_publish_date?: string;
   authors?: { author?: { key: string } }[];
-  /** Merged works are left behind as redirect stubs pointing at the canonical work. */
+
   type?: { key: string };
   location?: string;
 }

@@ -8,7 +8,6 @@ import { colors, radius, spacing } from '@/theme';
 import type { ViewHandle, ViewRef } from '@/utils/refs';
 import { AppText } from '@/components/AppText';
 
-/** Fixed height so FlatList can use getItemLayout instead of measuring rows. */
 export const BOOK_ROW_HEIGHT = 120;
 const COVER_WIDTH = 64;
 const COVER_HEIGHT = 96;

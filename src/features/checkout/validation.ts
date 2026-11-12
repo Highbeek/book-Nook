@@ -10,20 +10,17 @@ export const emptyCheckoutValues: CheckoutValues = {
 
 export const digitsOnly = (value: string) => value.replace(/\D/g, '');
 
-/** "4242424242424242" -> "4242 4242 4242 4242" (max 19 digits). */
 export function formatCardNumber(value: string): string {
   return digitsOnly(value)
     .slice(0, 19)
     .replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
-/** "1229" -> "12/29"; keeps the slash while the user types. */
 export function formatExpiry(value: string): string {
   const digits = digitsOnly(value).slice(0, 4);
   return digits.length <= 2 ? digits : `${digits.slice(0, 2)}/${digits.slice(2)}`;
 }
 
-/** Any 12–19 digit number is accepted: this is a demo checkout, so there is no Luhn check. */
 export function isValidCardNumber(cardNumber: string): boolean {
   return /^\d{12,19}$/.test(digitsOnly(cardNumber));
 }
@@ -42,14 +39,9 @@ export function isValidExpiry(expiry: string, now: Date = new Date()): boolean {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface CheckoutSchemaContext {
-  /** Injectable clock for the expiry check (tests pin it). */
   now?: Date;
 }
 
-/**
- * Checkout rules. Each field lists `required` first so an empty field gets the "Enter…"
- * message rather than a format error. Trimming happens here, so submitted values are clean.
- */
 export const checkoutSchema = yup.object({
   fullName: yup
     .string()

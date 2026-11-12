@@ -14,12 +14,11 @@ import { AppText } from './AppText';
 export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
   label: string;
   error?: string;
-  /** Style for the wrapper (label + input + error), e.g. `flex: 1` in a row. */
+
   style?: StyleProp<ViewStyle>;
   ref?: Ref<ComponentRef<typeof TextInput>>;
 }
 
-/** Labelled text input with an inline error. The label doubles as the accessible name. */
 export function TextField({ label, error, style, ref, ...input }: TextFieldProps) {
   return (
     <Animated.View layout={LinearTransition.duration(180)} style={[styles.field, style]}>

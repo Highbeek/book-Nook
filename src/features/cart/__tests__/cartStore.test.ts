@@ -47,8 +47,8 @@ describe('cart store', () => {
   });
 
   it('computes the total across lines and quantities', () => {
-    cart().addItem(bookA, 3); // 7,500
-    cart().addItem(bookB, 2); // 20,000
+    cart().addItem(bookA, 3);
+    cart().addItem(bookB, 2);
     expect(total()).toBe(27_500_00);
     expect(count()).toBe(5);
   });

@@ -29,10 +29,6 @@ export function createAbortError(): Error {
   return error;
 }
 
-/**
- * fetch with a timeout and typed, user-presentable errors. Caller aborts are rethrown as
- * AbortError so callers can ignore them.
- */
 export async function fetchJson<T>(url: string, options: RequestOptions = {}): Promise<T> {
   const { signal, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
   if (signal?.aborted) throw createAbortError();

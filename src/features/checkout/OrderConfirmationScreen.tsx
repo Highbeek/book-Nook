@@ -23,7 +23,6 @@ import { AppText } from '@/components/AppText';
 
 const checkIcon = require('../../../assets/icons/check.png');
 
-/** Staggered entrance: content rises into place one piece after another. */
 const rise = (delayMs: number) => FadeInDown.delay(delayMs).springify().damping(18);
 
 export function OrderConfirmationScreen() {
@@ -93,14 +92,12 @@ export function OrderConfirmationScreen() {
         entering={rise(850)}
         style={[styles.footer, { paddingBottom: insets.bottom + spacing.lg }]}
       >
-        {/* Forward to a fresh home screen; the paid checkout flow is cleared from history. */}
         <Button label="Continue shopping" onPress={() => resetStack('index')} />
       </Animated.View>
     </View>
   );
 }
 
-/** The check pops in on a spring, and a ring ripples out from the halo twice. */
 function SuccessBadge() {
   const reduceMotion = useReducedMotion();
   const ripple = useSharedValue(0);

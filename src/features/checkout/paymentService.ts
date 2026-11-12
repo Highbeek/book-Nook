@@ -1,10 +1,5 @@
 import { digitsOnly } from './validation';
 
-/**
- * Mock payment gateway. Mirrors a hosted-payments flow (tokenise, then charge) without moving
- * money or keeping card data; see the README for a production setup.
- */
-
 export const DECLINED_TEST_CARD = '4000000000000002';
 export const DEFAULT_PAYMENT_DELAY_MS = 1200;
 

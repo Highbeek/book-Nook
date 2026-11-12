@@ -8,19 +8,14 @@ export type TextTone =
 export type TextWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 
 export interface AppTextProps extends TextProps {
-  /** Size step from the type scale. Defaults to `body`. */
   variant?: TextVariant;
-  /** Semantic colour. Defaults to `default` (primary text colour). */
+
   tone?: TextTone;
-  /** Overrides the variant's default weight. */
+
   weight?: TextWeight;
   align?: TextStyle['textAlign'];
 }
 
-/**
- * The app's one text primitive: size, colour and weight come from the theme via props, so
- * screens don't repeat `fontSize`/`color` styles. `style` still works for one-off layout tweaks.
- */
 export function AppText({
   variant = 'body',
   tone = 'default',

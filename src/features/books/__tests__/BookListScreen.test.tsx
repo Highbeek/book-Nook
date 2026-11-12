@@ -76,7 +76,7 @@ describe('<BookListScreen />', () => {
     await waitFor(() =>
       expect(mockGetBooks).toHaveBeenLastCalledWith(expect.objectContaining({ query: 'achebe' })),
     );
-    // Typing 8 characters produced one search request, not eight.
+
     const searchCalls = mockGetBooks.mock.calls.filter(([params]) => params?.query);
     expect(searchCalls).toHaveLength(1);
   });

@@ -98,7 +98,6 @@ describe('useBooks', () => {
     await rerender({ q: 'dune' });
     await waitFor(() => expect(result.current.status).toBe('ready'));
 
-    // The browse request resolves late — it must not overwrite the search results.
     await act(async () => stale.resolve(page(1, ['old'])));
     expect(result.current.items.map((b) => b.id)).toEqual(['dune']);
     expect(mockGetBooks).toHaveBeenLastCalledWith(
@@ -131,7 +130,6 @@ describe('useBooks', () => {
     await waitFor(() => expect(result.current.status).toBe('error'));
     expect(result.current.items.map((b) => b.id)).toEqual(['a']);
 
-    // onEndReached firing again must not hammer the API while in error
     await act(async () => result.current.loadMore());
     expect(mockGetBooks).toHaveBeenCalledTimes(2);
 

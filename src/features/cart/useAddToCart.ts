@@ -5,7 +5,6 @@ import type { ViewRef } from '@/utils/refs';
 
 import { useCartStore, type CartBook } from './cartStore';
 
-/** Updates the cart immediately; the fly-to-cart animation is decoration only. */
 export function useAddToCart() {
   const addItem = useCartStore((s) => s.addItem);
   const fly = useFlyToCart();

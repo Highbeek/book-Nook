@@ -9,7 +9,6 @@ import { useCartStore } from '../cartStore';
 
 const book = makeBook({ id: 'A', title: 'Purple Hibiscus', price: 3_000_00 });
 
-/** Renders every cart line plus the summary, like the cart screen does. */
 function CartUnderTest() {
   const lines = useCartStore((s) => s.lines);
   return (

@@ -8,11 +8,10 @@ export interface FormTextFieldProps<T extends FieldValues> extends Omit<
 > {
   control: Control<T>;
   name: FieldPath<T>;
-  /** Reformat raw input as the user types (e.g. card number grouping). */
+
   format?: (raw: string) => string;
 }
 
-/** A TextField bound to react-hook-form: value, errors, blur, and focus-on-error. */
 export function FormTextField<T extends FieldValues>({
   control,
   name,

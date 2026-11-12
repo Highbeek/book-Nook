@@ -26,7 +26,7 @@ describe('<CheckoutForm />', () => {
     for (const label of ['Card number', 'Expiry (MM/YY)', 'CVC']) {
       expect(screen.getByLabelText(label)).toHaveProp('inputMode', 'numeric');
     }
-    // Pasted or hardware-keyboard letters are stripped.
+
     await user.type(screen.getByLabelText('Card number'), '4242abcd4242');
     expect(screen.getByLabelText('Card number')).toHaveDisplayValue('4242 4242');
   });
@@ -91,7 +91,7 @@ describe('<CheckoutForm />', () => {
     const busyButton = screen.getByTestId('pay-button');
     expect(busyButton).toBeDisabled();
     expect(busyButton).toBeBusy();
-    // A second tap while processing must not double-charge.
+
     await user.press(busyButton);
     expect(pay).toHaveBeenCalledTimes(1);
     expect(pay).toHaveBeenCalledWith({

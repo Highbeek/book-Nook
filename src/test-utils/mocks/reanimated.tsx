@@ -1,7 +1,3 @@
-/**
- * Reanimated 4.7's bundled mock needs native modules Jest doesn't have, so this stubs only the
- * APIs the app uses: animations finish instantly and animated components render as plain ones.
- */
 import type { ComponentType } from 'react';
 import { FlatList, Image, ScrollView, Text, View } from 'react-native';
 
@@ -65,7 +61,6 @@ export function interpolate(value: number, input: number[], output: number[]) {
 export const withDelay = <T,>(_delayMs: number, value: T) => value;
 export const withRepeat = <T,>(value: T) => value;
 
-/** Layout-animation builders (FadeInDown.delay(…).springify()…): every call chains to itself. */
 const builder: Record<string, unknown> = new Proxy({}, { get: () => () => builder });
 export const FadeIn = builder;
 export const FadeInDown = builder;

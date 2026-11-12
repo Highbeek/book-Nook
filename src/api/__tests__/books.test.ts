@@ -21,7 +21,7 @@ const searchResponse = {
       cover_i: 11481354,
       first_publish_year: 1965,
     },
-    { key: '/works/OL1W' }, // sparse doc: everything optional
+    { key: '/works/OL1W' },
   ],
 };
 
@@ -127,7 +127,7 @@ describe('getBooks', () => {
   });
 
   it('reports no more pages when a page comes back short', async () => {
-    mockFetch().mockResolvedValue(mockResponse(searchResponse)); // 2 docs
+    mockFetch().mockResolvedValue(mockResponse(searchResponse));
     const page = await getBooks({ query: 'dune', page: 1, limit: 20 });
     expect(page.hasMore).toBe(false);
   });
@@ -182,7 +182,7 @@ describe('getBookById', () => {
       id: 'OL893415W',
       title: 'Dune',
       authors: ['Frank Herbert'],
-      coverId: 11481354, // skips the invalid -1 cover
+      coverId: 11481354,
       firstPublishYear: 1965,
       price: priceFor('OL893415W'),
       description: 'A desert planet.',

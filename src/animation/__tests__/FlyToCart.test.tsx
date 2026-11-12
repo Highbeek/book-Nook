@@ -5,7 +5,6 @@ import type { ViewRef } from '@/utils/refs';
 
 import { FlyToCartProvider, useFlyToCart } from '../FlyToCart';
 
-/** A ref whose node reports a fixed on-screen rectangle. */
 function measuredRef(x: number, y: number, width: number, height: number) {
   const measureInWindow = jest.fn((cb: (...r: number[]) => void) => cb(x, y, width, height));
   return { ref: { current: { measureInWindow } } as unknown as ViewRef, measureInWindow };
@@ -37,7 +36,7 @@ describe('FlyToCart', () => {
     await user.press(screen.getByRole('button', { name: 'Launch' }));
 
     expect(source.measureInWindow).toHaveBeenCalled();
-    // The test double completes animations instantly, so the flying cover is already removed.
+
     expect(screen.queryByText('Dune')).not.toBeOnTheScreen();
   });
 

@@ -51,7 +51,6 @@ export interface FlyToCartItem {
 }
 
 interface FlyToCartContextValue {
-  /** Returns an unregister function. */
   registerTarget: (ref: ViewRef) => () => void;
   fly: (source: ViewRef | null, item: FlyToCartItem) => void;
   bump: SharedValue<number>;
@@ -89,7 +88,7 @@ function FlyingCover({ flight, onDone }: { flight: Flight; onDone: (id: number) 
 
   const style = useAnimatedStyle(() => {
     const p = progress.value;
-    // Parabolic lift turns the straight path into an arc.
+
     const arc = -ARC_HEIGHT * 4 * p * (1 - p);
     return {
       opacity: interpolate(p, [0, 0.85, 1], [1, 0.9, 0]),
@@ -159,14 +158,14 @@ export function FlyToCartProvider({ children }: { children: ReactNode }) {
         bumpCart();
         return;
       }
-      // The most recently mounted cart icon belongs to the screen on top of the stack.
+
       const target = targets.current[targets.current.length - 1];
       const [from, measuredTo] = await Promise.all([measure(source), measure(target)]);
       if (!from) {
         bumpCart();
         return;
       }
-      // If the icon can't be measured, aim at the header's trailing edge.
+
       const to = measuredTo ?? { x: windowWidth - 44, y: insets.top + 8, width: 28, height: 28 };
       const id = ++nextId.current;
       setFlights((current) => [...current, { id, from, to, ...item }]);
@@ -194,7 +193,6 @@ const fallbackContext: Omit<FlyToCartContextValue, 'bump'> = {
   fly: noop,
 };
 
-/** Outside the provider the animation is a no-op. */
 export function useFlyToCart() {
   const ctx = useContext(FlyToCartContext);
   return ctx?.fly ?? fallbackContext.fly;

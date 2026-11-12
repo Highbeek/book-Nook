@@ -13,10 +13,6 @@ type Settled = { key: string } & (
   { status: 'success'; book: BookDetail } | { status: 'error'; error: string }
 );
 
-/**
- * Results are keyed by `id` + retry attempt; a result for an older key is ignored, so the
- * screen shows `loading` until the current request settles (never a stale book or error).
- */
 export function useBookDetails(id: string | undefined) {
   const [attempt, setAttempt] = useState(0);
   const [settled, setSettled] = useState<Settled | null>(null);

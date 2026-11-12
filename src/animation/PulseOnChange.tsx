@@ -10,13 +10,11 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export interface PulseOnChangeProps {
-  /** The pulse plays whenever this changes (not on first render). */
   value: unknown;
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
 }
 
-/** Briefly scales its children up and back when `value` changes, to draw the eye to a new number. */
 export function PulseOnChange({ value, children, style }: PulseOnChangeProps) {
   const reduceMotion = useReducedMotion();
   const scale = useSharedValue(1);

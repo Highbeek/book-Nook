@@ -15,7 +15,6 @@ export interface BookCoverProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** `recyclingKey` stops a recycled list cell flashing the previous book's cover. */
 function BookCoverComponent({ coverId, title, width, height, size = 'M', style }: BookCoverProps) {
   const uri = coverUrl(coverId, size);
   const box = [styles.box, { width, height }, style];

@@ -8,7 +8,6 @@ import { AppText } from './AppText';
 export type PriceVariant = 'default' | 'large' | 'total';
 
 export interface PriceProps {
-  /** Amount in minor units (kobo). */
   amount: number;
   quantity?: number;
   variant?: PriceVariant;

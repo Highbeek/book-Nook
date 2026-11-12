@@ -4,7 +4,6 @@ function loadEnv(vars: Record<string, string | undefined>) {
   process.env = { ...ORIGINAL_ENV, ...vars };
   let env!: typeof import('../env').env;
   jest.isolateModules(() => {
-    // env is read once at import time, so each case needs a fresh module.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     env = require('../env').env;
   });

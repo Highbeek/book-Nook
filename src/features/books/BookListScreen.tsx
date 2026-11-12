@@ -98,7 +98,6 @@ export function BookListScreen() {
   return (
     <View style={styles.screen}>
       <SearchBar value={search} onChangeText={setSearch} />
-      {/* Kept outside the FlatList: a list header would offset rows and break getItemLayout. */}
       {total > 0 ? (
         <AppText variant="caption" tone="muted" style={styles.count}>
           {query ? `${total.toLocaleString()} results` : `${total.toLocaleString()} books`}

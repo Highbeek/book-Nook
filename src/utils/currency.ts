@@ -14,7 +14,6 @@ const fractionalFormatter = new Intl.NumberFormat('en-NG', {
   maximumFractionDigits: 2,
 });
 
-/** Formats integer minor units (kobo) for display, e.g. 250000 -> "₦2,500". */
 export function formatPrice(minorUnits: number): string {
   if (!Number.isFinite(minorUnits)) return '—';
   const rounded = Math.round(minorUnits);
