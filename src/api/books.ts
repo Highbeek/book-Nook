@@ -1,3 +1,5 @@
+import { env } from '@/config/env';
+
 import { ApiError, createAbortError, fetchJson } from './client';
 import { priceFor } from './pricing';
 import type {
@@ -12,8 +14,8 @@ import type {
   OLWork,
 } from './types';
 
-export const API_BASE = 'https://openlibrary.org';
-export const COVERS_BASE = 'https://covers.openlibrary.org';
+export const API_BASE = env.apiUrl;
+export const COVERS_BASE = env.coversUrl;
 export const DEFAULT_PAGE_SIZE = 20;
 export const BROWSE_SUBJECT = 'fiction';
 
