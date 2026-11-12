@@ -42,3 +42,8 @@ yarn-error.*
 
 # Test coverage
 coverage/
+
+# Local config
+AGENTS.md
+CLAUDE.md
+.claude/
